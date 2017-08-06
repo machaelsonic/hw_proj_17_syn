@@ -251,9 +251,9 @@ PORT MAP(clk => clk,
 		 source_imag => ifft_source_imag,
 		 source_real => ifft_source_real_t);
 
---tx_data_o<=ifft_source_real_t;
+tx_data_o<=ifft_source_real_t;
 
-tx_data_o<=ifft_dout_real_t;
+--tx_data_o<=ifft_dout_real_t;
 
 
 b2v_inst2 : ifft_data_gen
