@@ -28,8 +28,8 @@ signal valid_t,valid1_t,valid_t1:std_logic;
          elsif clk'event and clk='1' then
             valid1_t<=valid1;
             if valid1='1' then
-               do_t<=d1;
-					--do_t<=d1(7 downto 0)&"0000";
+               --do_t<=d1;
+					do_t<=d1(7 downto 0)&"0000";
             else
                if valid2='1' then
                   do_t<=d2(11 downto 0);

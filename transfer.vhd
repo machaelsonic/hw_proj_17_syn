@@ -145,16 +145,17 @@ COMPONENT cp_insert
 END COMPONENT;
 
 COMPONENT tx_data
-	port(rst_n: in std_logic;
-        clk: in std_logic;
-        d1: in std_logic_vector(11 downto 0);
-        d2: in std_logic_vector(15 downto 0);
-        valid1: in std_logic;
-        valid2:in std_logic;
-        do:out std_logic_vector(11 downto 0);
-        data_valid: out std_logic;
-		  c0:out std_logic;
-		  c1:out std_logic);
+	PORT(rst_n : IN STD_LOGIC;
+		 clk : IN STD_LOGIC;
+		 valid1 : IN STD_LOGIC;
+		 valid2 : IN STD_LOGIC;
+		 d1 : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+		 d2 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		 data_valid : OUT STD_LOGIC;
+		 do : OUT STD_LOGIC_VECTOR(11 DOWNTO 0);
+		 c0:out std_logic;
+		 c1:out std_logic 
+	);
 END COMPONENT;
 
 COMPONENT tx_ctr
@@ -197,8 +198,8 @@ SIGNAL	 ifft_sink_ready_t: std_logic;
 signal cnt_t: integer range 0 to 255;
 signal ifft_sop_t_gold,ifft_eop_t_gold,ifft_sink_ready_t_gold:  STD_LOGIC; 
 signal a: std_logic_vector(11 downto 0);
---signal c0,c1:std_logic;
-
+signal en_d,ffr_rst_n,en_delay_8:std_logic;
+signal tmp: std_logic_vector(7 downto 0);
 
 
 BEGIN 
@@ -220,21 +221,44 @@ rom_rd_en <=rom_rd_en_t;
 send_data_valid <=send_data_valid_t;
 --tx_ctr_do <=tx_ctr_do_t;
  ifft_sink_ready <= ifft_sink_ready_t;
-
 b2v_inst : rom_ip
 PORT MAP(rden => rom_rd_en_t,
 		 clock => clk,
 		 address => rom_rd_adr_t,
 		 q => pre_win_data_t);
 
-
+ process(rst_n,clk) is   
+   begin 
+      if rst_n='0' then 
+	     en_d<='0';
+	  elsif clk'event and clk='1' then
+	     en_d<=en;
+	  end if;
+	  
+	  ffr_rst_n<=rst_n and (not(en_d) or en);
+ end process;
+ 
+ process(rst_n,clk) is   
+   begin 
+      if rst_n='0' then 
+	     tmp<=(others=>'0');
+	  elsif clk'event and clk='1' then
+	     tmp(0)<=en;
+	     for i in 0 to 6 loop
+		   tmp(i+1)<=tmp(i);
+		   end loop;
+		  en_delay_8<=tmp(7);
+	  end if;
+ end process;
+ 
 b2v_inst1 : fft_ip
 PORT MAP(clk => clk,
-		 reset_n => rst_n,
+		 --reset_n => rst_n ,
+		 reset_n =>ffr_rst_n,
 		 clk_ena => '1',
 		 inverse => '1',
-		 --sink_valid => ifft_data_valid_t,
-		 sink_valid => '1',
+		 sink_valid => ifft_data_valid_t,
+		 --sink_valid => '1',
 		 sink_sop => ifft_sop_t,
 		 sink_eop => ifft_eop_t,
 		 --source_ready => ifft_source_ready_t,
@@ -251,9 +275,6 @@ PORT MAP(clk => clk,
 		 source_imag => ifft_source_imag,
 		 source_real => ifft_source_real_t);
 
-tx_data_o<=ifft_source_real_t;
-
---tx_data_o<=ifft_dout_real_t;
 
 
 b2v_inst2 : ifft_data_gen
@@ -295,36 +316,24 @@ PORT MAP(rst_n => rst_n,
 		 wr_adr => ram_wr_adr);
 
 
---b2v_inst4 : tx_data
---PORT MAP(rst_n => rst_n,
---		 clk => clk,
---		 valid1 => pre_win_data_valid_t,
---		 valid2 => ram_data_valid_t,
---		 d1 => pre_win_data_t,
---		 d2 => ram_rd_data_t,
---		 data_valid => tx_data_valid,
---		 do => tx_data_o,
---		 c0=>c0,
---		 c1=>c1
---		 );
-		 
 b2v_inst4 : tx_data
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
-		 valid1 => '1',
-		 valid2 => '1',
+		 valid1 => pre_win_data_valid_t,
+		 valid2 => ram_data_valid_t,
 		 d1 => pre_win_data_t,
 		 d2 => ram_rd_data_t,
 		 data_valid => tx_data_valid,
-		 --do => tx_data_o,
-		 c0=>c0,
-		 c1=>c1
-		 );
+		 do => tx_data_o,
+		 c0 =>c0,
+		 c1 =>c1);
+
 
 b2v_inst5 : tx_ctr
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
-		 en => en,
+		 --en => en,
+		 en => en_delay_8,
 		 ifft_eop => ifft_eop_t,
 		 din => din,
 		 rd_en => rom_rd_en_t,
@@ -335,40 +344,6 @@ PORT MAP(rst_n => rst_n,
 		 cnt_o => cnt,
 		 dout => tx_ctr_do_t);
 
-
-		 
-		 process(rst_n,clk) is
-    begin
-      if rst_n='0' then
-         cnt_t<=0; 
-         ifft_sop_t_gold<='1'; 
-         ifft_eop_t_gold<='0';        
-      elsif clk'event and clk='1' then   
-         if ifft_sink_ready_t_gold ='1' then
-           if cnt_t=255 then
-              cnt_t<=0;
-           else
-              cnt_t<=cnt_t+1;
-           end if;
-		 else 
-		     cnt_t<=0;
-		 end if;
-	    case cnt_t is
-           when 255 =>
-            ifft_sop_t_gold<='0'; 
-            ifft_eop_t_gold<='1';  
-           when 0 =>
-            ifft_sop_t_gold<='1'; 
-            ifft_eop_t_gold<='0';  
-           when others =>
-            ifft_sop_t_gold<='0'; 
-            ifft_eop_t_gold<='0';  
-         end case;
-
-      end if;
-
-
-  end process;
 -- ifft_dout_imag_t<=(others=>'0');
 -- ifft_dout_real_t<=conv_std_logic_vector(cnt_t,12);
 a<=conv_std_logic_vector(cnt_t,12);
