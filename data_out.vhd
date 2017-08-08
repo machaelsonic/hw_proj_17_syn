@@ -15,7 +15,11 @@ architecture rtl of data_out is
   type state_t is (s_rst,s_idle,s1,s2);
   signal state,next_state:state_t;
   signal tmp:std_logic_vector(35 downto 0);
-  
+  signal tmp1:std_logic_vector(31 downto 0);
+  attribute keep: boolean;
+  attribute keep of state:signal is true;
+  attribute keep of next_state:signal is true;
+  signal sink_valid_t:std_logic;
   begin
    process(rst_n,clk) is
      begin
@@ -26,7 +30,7 @@ architecture rtl of data_out is
        end if;
   end process;
   
-    process(state,sink_eop) is
+    process(state) is
      begin
         case state is
 		     when s_rst =>
@@ -62,24 +66,30 @@ architecture rtl of data_out is
 	   if clk'event and clk='1' then
         case state is
 		    when s_rst =>
-              tmp<=(others=>'0');
-				  data_valid<='0';  
+				  sink_valid_t<='0';  
 			 when s_idle =>
-			     tmp<=(others=>'0');
-				  data_valid<='0'; 
-			 when s2 =>
-		        tmp<=tmp;
-				  data_valid<='0'; 
---				  tmp<=din;
---				  data_valid<=sink_valid; 
+				  sink_valid_t<='0'; 
 			 when s1 =>
-			     tmp<=din;
-				  data_valid<=sink_valid; 
+				  sink_valid_t<='0'; 
+			 when s2 =>
+				  sink_valid_t<=sink_valid;
 			end case;
 		end if;		 
   end process;
-   dout<=tmp;
-     
+	
+	process(rst_n,clk) is
+	   begin
+		  if rst_n='0' then
+		     dout<=(others=>'0');
+           data_valid<='0';
+		  elsif clk'event and clk='1' then
+		      if sink_valid_t='1' then
+               dout<=din;
+			  end if;
+			  data_valid<=sink_valid_t;
+		  end if;
+	end process;  
+				    
   end architecture rtl;   
      
      

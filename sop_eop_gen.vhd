@@ -7,7 +7,8 @@ entity sop_eop_gen is
 		  pre_cnt: in std_logic;
 		  sop:out std_logic;
 		  eop:out std_logic;
-		  data_valid:out std_logic);
+		  data_valid:out std_logic;
+		  rcv_data_valid:out std_logic);
 end entity sop_eop_gen;
 
 architecture rtl of sop_eop_gen is
@@ -92,14 +93,16 @@ process(rst_n,clk) is
 			  else
 					 data_valid<='0';
 			  end if;
---          if (cnt>=409 and cnt<=4097) then
---			     data_valid<='1';
---			 else
---			     data_valid<='0';
---			 end if;
+			  
+           if (cnt>=24 and cnt<=565)then
+					 rcv_data_valid<='1';
+			  else
+					 rcv_data_valid<='0';
+			  end if;
 		  else
 		     cnt<=0;
 			  data_valid<='0';
+			  rcv_data_valid<='0';
 			  sop<='0';
 			  eop<='0';
 		 end if;

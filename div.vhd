@@ -38,7 +38,7 @@ begin
 		  tmp5:=0;
 		  pre_cnt<='0';
 	  elsif clk'event and clk='1' then
-		 if (din2>20000 and flag='0')  then 
+		 if (din2>39000 and flag='0')  then 
 		   if p_cnt=255 then
 			   p_cnt<=0;
 			else

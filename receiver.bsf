@@ -20,9 +20,9 @@ applicable agreement for further details.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 296 576)
+	(rect 16 16 296 608)
 	(text "receiver" (rect 5 0 38 12)(font "Arial" ))
-	(text "inst" (rect 8 544 20 556)(font "Arial" ))
+	(text "inst" (rect 8 576 20 588)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -275,7 +275,14 @@ applicable agreement for further details.
 		(text "x_cor2[20..0]" (rect 206 523 259 535)(font "Arial" ))
 		(line (pt 280 528)(pt 264 528)(line_width 3))
 	)
+	(port
+		(pt 280 544)
+		(output)
+		(text "rcv_data_valid" (rect 0 0 60 12)(font "Arial" ))
+		(text "rcv_data_valid" (rect 199 539 259 551)(font "Arial" ))
+		(line (pt 280 544)(pt 264 544)(line_width 1))
+	)
 	(drawing
-		(rectangle (rect 16 16 264 544)(line_width 1))
+		(rectangle (rect 16 16 264 576)(line_width 1))
 	)
 )
