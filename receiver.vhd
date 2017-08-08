@@ -350,7 +350,7 @@ b2v_inst36 : fifo_256
 		 
 		 
 
-rst_n <= NOT(rst);
+rst_n <= NOT(rst or not(rcv_en));
 
 
 
