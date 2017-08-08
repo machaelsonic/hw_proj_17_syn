@@ -1292,6 +1292,23 @@ applicable agreement for further details.
 		(line (pt 8 8)(pt 24 8))
 	)
 )
+(symbol
+	(rect 864 944 896 976)
+	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
+	(text "inst19" (rect 3 21 32 33)(font "Arial" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
+)
 (connector
 	(pt 368 128)
 	(pt 368 120)
@@ -1610,11 +1627,6 @@ applicable agreement for further details.
 	(pt 248 704)
 )
 (connector
-	(text "tx_data_valid" (rect 967 952 1033 964)(font "Arial" ))
-	(pt 912 968)
-	(pt 1032 968)
-)
-(connector
 	(text "<<__$DEF_ALIAS89>>" (rect 460 80 572 92)(font "Arial" )(invisible))
 	(pt 520 96)
 	(pt 440 96)
@@ -1638,6 +1650,22 @@ applicable agreement for further details.
 (connector
 	(pt 1080 224)
 	(pt 1080 232)
+)
+(connector
+	(pt 1032 968)
+	(pt 928 968)
+)
+(connector
+	(pt 928 968)
+	(pt 928 928)
+)
+(connector
+	(pt 928 928)
+	(pt 880 928)
+)
+(connector
+	(pt 880 944)
+	(pt 880 928)
 )
 (junction (pt 512 992))
 (junction (pt 512 1008))
