@@ -96,14 +96,14 @@ end% end of if chan_type==1
 if is_noise==1
     %加噪方式一
 %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     %计算信号功率
-%     SignalPower=var(channel_out);%平稳随机过程中信号的方差为信号交流平均功率
-%     %根据信噪比得到相应高斯噪声的功率
-%     noise=normrnd(0,sqrt(.5*SignalPower/(10^(snr/10))),1,length(channel_out));%%%%%*产生维数与信道输出序列长度相同服从均值为零，产生正态分布随机数的函数normrnd-用来产生高斯随机矩阵  
-%     %均方差为sqrt(.5*SignalPower/(10^(snr/10)))正态分布的随机数，做为加入的高斯白噪声信号
-%     %添加噪声
-%     channel_out=channel_out+noise;
+    %计算信号功率
+    SignalPower=var(channel_out);%平稳随机过程中信号的方差为信号交流平均功率
+    %根据信噪比得到相应高斯噪声的功率
+    noise=normrnd(0,sqrt(.5*SignalPower/(10^(snr/10))),1,length(channel_out));%%%%%*产生维数与信道输出序列长度相同服从均值为零，产生正态分布随机数的函数normrnd-用来产生高斯随机矩阵  
+    %均方差为sqrt(.5*SignalPower/(10^(snr/10)))正态分布的随机数，做为加入的高斯白噪声信号
+    %添加噪声
+    channel_out=channel_out+noise;
 %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %  加噪方式二
-     [channel_out,NOISE] = noisegen(channel_out,snr);
+    %  [channel_out,NOISE] = noisegen(channel_out,snr);
 end % end of if is_noise==1

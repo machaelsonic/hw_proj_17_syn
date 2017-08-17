@@ -1,6 +1,6 @@
 function [load_data,valid_data,pre_phase_next]=data_gen(pre_phase)
  data=rand(1,36);%产生随机数据
-  %data=zeros(1,36);
+ %data=ones(1,36);
 for k=1:36 
     if data(k)>0.5 
        data(k)=1; 
