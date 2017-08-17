@@ -1,4 +1,4 @@
-function [frame_syn,symbol_syn,syn_point,start_point,fft_window,fft_point,fft_data,h]=syn_cox(data,p)
+function [frame_syn,symbol_syn,syn_point,start_point,fft_window,fft_point,fft_data,h,m_rcv_fft]=syn_cox(data,p)
 [N,M]=size(data);
 s=zeros(1,512);
 s_a_buff=zeros(1,256);
