@@ -7,7 +7,6 @@ entity ifft_data_gen is
        clk: in std_logic;
        din: in std_logic_vector(35 downto 0);
        source_data_valid:in std_logic;
-	   ifft_sink_ready: in std_logic;
        sink_data_valid:out std_logic;
        sop:out std_logic;
        eop:out std_logic;
@@ -28,7 +27,7 @@ architecture rtl of ifft_data_gen is
          --sink_data_valid<='0';
       elsif clk'event and clk='1' then
         sink_data_valid<=source_data_valid;
-         if source_data_valid='1' then
+          if source_data_valid='1' then
            if cnt=255 then
               cnt<=0;
            else
@@ -46,8 +45,8 @@ architecture rtl of ifft_data_gen is
             eop<='0';
          end case;
 		else 
-		 cnt<=0;
-		 sop<='0'; 
+		     cnt<=0;
+		     sop<='0'; 
          eop<='0'; 
 		 end if;
       end if;

@@ -1,6 +1,10 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
- USE ieee.std_logic_unsigned.all;
+USE ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+use std.textio.all;
+
+
 entity tb_transfer is
 end entity tb_transfer;
 
@@ -29,7 +33,6 @@ architecture rtl of tb_transfer is
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
-		rd_continue_o :  OUT  STD_LOGIC;
 		flag_o1 :  OUT  STD_LOGIC;
 		flag_eop :  OUT  STD_LOGIC;
 		cnt :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
@@ -52,11 +55,19 @@ architecture rtl of tb_transfer is
 	);
 END component transfer;
 
+FILE tb_tx_data_o:TEXT OPEN WRITE_MODE IS "tb_tx_data_o.txt";
+FILE tb_pre_win_data:TEXT OPEN WRITE_MODE IS "tb_pre_win_data.txt";
+FILE tb_ifft_source_real:TEXT OPEN WRITE_MODE IS "tb_ifft_source_real.txt";
 
-signal cnt_1:integer range 0 to 2299;
+signal cnt_1:integer range 0 to 4999;
 signal tmp,din :std_logic_vector(35 downto 0);
 signal d_t:std_logic;
 signal rst_n,clk,en:std_logic;
+signal tx_data_valid:std_logic;
+signal tx_data_o : STD_LOGIC_VECTOR(11 DOWNTO 0);
+signal ifft_source_real :STD_LOGIC_VECTOR(11 DOWNTO 0);
+signal pre_win_data_valid :STD_LOGIC;
+signal pre_win_data :STD_LOGIC_VECTOR(11 DOWNTO 0);
 
 begin
 
@@ -79,7 +90,7 @@ END PROCESS ;
 
        clk<='1';
     wait for 20 ns;
-      clk<='0';
+       clk<='0';
     wait for 20 ns; 
    end process;
 
@@ -92,7 +103,7 @@ END PROCESS ;
 				 d_t<='0';
 				 tmp<=(others=>'0');
 			 elsif clk'event and clk='1' then
-			    if cnt_1=2299 then
+			    if cnt_1=4999 then
 				    cnt_1<=0;
 					 d_t<='1';
 					 tmp<=tmp+1;
@@ -111,10 +122,15 @@ din<=tmp;
 
 u1: transfer PORT map 
 	(
-		rst_n,
-		clk,
-		en,
-		din);
+		rst_n =>rst_n,
+		clk =>clk,
+		en =>en,
+		din =>din,
+		tx_data_valid=>tx_data_valid,
+		tx_data_o=>tx_data_o,
+		ifft_source_real => ifft_source_real,
+		pre_win_data => pre_win_data,
+		pre_win_data_valid => pre_win_data_valid);
 		-- ram_rd_en,
 		-- ram_wr_en,
 		-- tx_data_valid,
@@ -125,7 +141,7 @@ u1: transfer PORT map
 		-- ifft_source_sop,
 		-- ifft_source_eop,
 		-- rom_rd_en,
-		-- send_data_valid,
+		--send_data_valid
 		-- pre_win_data_valid,
 		-- ram_data_valid,
 		-- flag_o,
@@ -151,7 +167,47 @@ u1: transfer PORT map
 		-- ram_wr_adr,
 		-- rd_cnt_o,
 		-- rom_rd_adr,
-		-- tx_data_o);
+		--);
+	
+process(clk) is
+ 	VARIABLE lo_1:LINE;
+    BEGIN
+	     if rising_edge(clk) then
+				if tx_data_valid='1' then
+					WRITE (lo_1,to_integer(signed(tx_data_o)),left,10);
+					WRITELINE (tb_tx_data_o,lo_1);
+				end if;
+		 end if;
+end process;	
+	
+process(clk) is
+	VARIABLE lo_1:LINE;
+	--alias ifft_source_valid is <<signal i1.b2v_inst1.ifft_source_ready_t  : STD_LOGIC>>;
+  alias ifft_source_valid is <<signal u1.b2v_inst1.source_valid  : STD_LOGIC>>;
+
+   BEGIN
+	     if rising_edge(clk) then
+				if ifft_source_valid='1' then
+					-- WRITE (lo_1,to_bit(ifft_source_sop),left ,10);
+					-- WRITE (lo_1,to_bit(ifft_source_eop),left ,10);
+					WRITE (lo_1,to_integer(signed(ifft_source_real)),left,10);
+					WRITELINE (tb_ifft_source_real,lo_1);
+				end if;
+		end if;
+	end 
+process;
+
+process(clk) is
+ 	VARIABLE lo_1:LINE;
+    BEGIN
+	     if rising_edge(clk) then
+				if pre_win_data_valid='1' then
+					WRITE (lo_1,to_integer(signed(pre_win_data)),left,10);
+					WRITELINE (tb_pre_win_data,lo_1);
+				end if;
+		 end if;
+end process;	
+
 		
 end rtl;
 

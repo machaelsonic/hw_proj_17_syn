@@ -18,7 +18,8 @@
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all; 
-USE ieee.std_logic_arith.all; 
+USE ieee.std_logic_arith.all;
+USE ieee.std_logic_unsigned.all; 
 LIBRARY work;
 
 ENTITY transfer IS 
@@ -45,10 +46,9 @@ ENTITY transfer IS
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
-		rd_continue_o :  OUT  STD_LOGIC;
 		flag_o1 :  OUT  STD_LOGIC;
 		flag_eop :  OUT  STD_LOGIC;
-		cnt :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
+		cnt :  OUT  STD_LOGIC_VECTOR(12 DOWNTO 0);
 		ifft_data :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ifft_dout_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_dout_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -57,6 +57,7 @@ ENTITY transfer IS
 		ifft_source_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		pre_win_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		pre_inverse:out std_logic;
 		ram1_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram2_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -110,7 +111,6 @@ GENERIC (N : INTEGER
        clk: in std_logic;
        din: in std_logic_vector(35 downto 0);
        source_data_valid:in std_logic;
-	   ifft_sink_ready: in std_logic;
        sink_data_valid:out std_logic;
        sop:out std_logic;
        eop:out std_logic;
@@ -125,11 +125,11 @@ COMPONENT cp_insert
 		 eop : IN STD_LOGIC;
 		 sop : IN STD_LOGIC;
 		 din : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
+		 state_cnt: in std_logic_vector(12 downto 0);
 		 rd_en : OUT STD_LOGIC;
 		 rd_sel : OUT STD_LOGIC;
 		 rd_data_sel : OUT STD_LOGIC;
 		 ram_data_oe : OUT STD_LOGIC;
-		 rd_continue_o : OUT STD_LOGIC;
 		 flag_o1 : OUT STD_LOGIC;
 		 flag_eop : OUT STD_LOGIC;
 		 wr_en : OUT STD_LOGIC;
@@ -151,6 +151,7 @@ COMPONENT tx_data
 		 valid2 : IN STD_LOGIC;
 		 d1 : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 		 d2 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		 state_cnt: in std_logic_vector(12 downto 0);
 		 data_valid : OUT STD_LOGIC;
 		 do : OUT STD_LOGIC_VECTOR(11 DOWNTO 0);
 		 c0:out std_logic;
@@ -169,8 +170,9 @@ COMPONENT tx_ctr
 		 ram_data_valid : OUT STD_LOGIC;
 		 flag_o : OUT STD_LOGIC;
 		 adr : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-		 cnt_o : OUT STD_LOGIC_VECTOR(9 DOWNTO 0);
-		 dout : OUT STD_LOGIC_VECTOR(35 DOWNTO 0)
+		 cnt_o : OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
+		 dout : OUT STD_LOGIC_VECTOR(35 DOWNTO 0);
+		 pre_inverse:out std_logic
 	);
 END COMPONENT;
 
@@ -196,7 +198,6 @@ SIGNAL	 ifft_sink_ready_t: std_logic;
 
 
 signal cnt_t: integer range 0 to 255;
-signal ifft_sop_t_gold,ifft_eop_t_gold,ifft_sink_ready_t_gold:  STD_LOGIC; 
 signal a: std_logic_vector(11 downto 0);
 signal en_d,ffr_rst_n,en_delay_8:std_logic;
 signal tmp: std_logic_vector(7 downto 0);
@@ -212,7 +213,7 @@ ifft_source_eop <=ifft_source_eop_t;
 ifft_source_sop <=ifft_source_sop_t;
 --ifft_source_ready <= ifft_source_ready_t;
 ifft_source_real <=ifft_source_real_t;
-pre_win_data <=pre_win_data_t;
+
 pre_win_data_valid <=pre_win_data_valid_t;
 ram_data_valid<=ram_data_valid_t;
 ram_rd_data <=ram_rd_data_t;
@@ -221,12 +222,16 @@ rom_rd_en <=rom_rd_en_t;
 send_data_valid <=send_data_valid_t;
 --tx_ctr_do <=tx_ctr_do_t;
  ifft_sink_ready <= ifft_sink_ready_t;
+ 
 b2v_inst : rom_ip
 PORT MAP(rden => rom_rd_en_t,
 		 clock => clk,
 		 address => rom_rd_adr_t,
 		 q => pre_win_data_t);
-
+		 
+   pre_win_data <=pre_win_data_t when pre_inverse='0' else
+                  0-pre_win_data_t;
+   
  process(rst_n,clk) is   
    begin 
       if rst_n='0' then 
@@ -285,7 +290,6 @@ PORT MAP(rst_n => rst_n,
 		 source_data_valid => send_data_valid_t,
 		 din => tx_ctr_do_t,
 		 sink_data_valid => ifft_data_valid_t,
-		 ifft_sink_ready =>ifft_sink_ready_t,
 		 sop => ifft_sop_t,
 		 eop => ifft_eop_t,
 		 dout_imag => ifft_dout_imag_t,
@@ -298,11 +302,11 @@ PORT MAP(rst_n => rst_n,
 		 eop => ifft_source_eop_t,
 		 sop => ifft_source_sop_t,
 		 din => ifft_source_real_t,
+		 state_cnt =>cnt,
 		 rd_en => ram_rd_en,
 		 rd_sel => rd_sel,
 		 rd_data_sel => rd_data_sel,
 		 ram_data_oe => ram_data_valid_t,
-		 rd_continue_o => rd_continue_o,
 		 flag_o1 => flag_o1,
 		 flag_eop => flag_eop,
 		 wr_en => ram_wr_en,
@@ -321,8 +325,9 @@ PORT MAP(rst_n => rst_n,
 		 clk => clk,
 		 valid1 => pre_win_data_valid_t,
 		 valid2 => ram_data_valid_t,
-		 d1 => pre_win_data_t,
+		 d1 => pre_win_data,
 		 d2 => ram_rd_data_t,
+		 state_cnt=>cnt,
 		 data_valid => tx_data_valid,
 		 do => tx_data_o,
 		 c0 =>c0,
@@ -342,7 +347,8 @@ PORT MAP(rst_n => rst_n,
 		 flag_o => flag_o,
 		 adr => rom_rd_adr_t,
 		 cnt_o => cnt,
-		 dout => tx_ctr_do_t);
+		 dout => tx_ctr_do_t,
+		 pre_inverse =>pre_inverse);
 
 -- ifft_dout_imag_t<=(others=>'0');
 -- ifft_dout_real_t<=conv_std_logic_vector(cnt_t,12);

@@ -1,11 +1,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 entity ifft_ram_wr_ctr is
   port(rst_n: in std_logic;
        clk: in std_logic;
        din: in std_logic_vector(11 downto 0);
        sop: in std_logic;
+       state_cnt: in std_logic_vector(12 downto 0);
        dout:out std_logic_vector(15 downto 0);
        wr_en:out std_logic;
        wr_adr:out std_logic_vector(7 downto 0);
@@ -31,7 +33,7 @@ architecture rtl of ifft_ram_wr_ctr is
         end if;
     end process;
     
-    process(state,rst_n,sop,wr_cnt) is
+    process(state,rst_n,state_cnt,wr_cnt) is
       begin
          case state is
             when s_rst =>
@@ -41,18 +43,14 @@ architecture rtl of ifft_ram_wr_ctr is
                  next_state<=s_rst;
               end if;
             when s_idle =>
-              if sop='1' then
+              if state_cnt=2306 then
                  next_state<=s_wr;
               else
                  next_state<=s_idle;
               end if;
             when s_wr =>
-              if wr_cnt=255 then
-				     if sop='1' then
-					     next_state<=s_wr;
-					  else
-                    next_state<=s_idle;
-					  end if;
+              if state_cnt=3842 then
+                  next_state<=s_idle;
               else
                  next_state<=s_wr;
               end if;

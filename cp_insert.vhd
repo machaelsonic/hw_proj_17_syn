@@ -29,13 +29,13 @@ ENTITY cp_insert IS
 		eop :  IN  STD_LOGIC;
 		sop :  IN  STD_LOGIC;
 		din :  IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		state_cnt: in std_logic_vector(12 downto 0);
 		rd_en :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		wr_en :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		ram_data_oe :  OUT  STD_LOGIC;
-		rd_continue_o :  OUT  STD_LOGIC;
 		flag_o1 :  OUT  STD_LOGIC;
 		flag_eop :  OUT  STD_LOGIC;
 		dout :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -55,11 +55,11 @@ COMPONENT ifft_ram_rd_ctr
 		 clk : IN STD_LOGIC;
 		 sop : IN STD_LOGIC;
 		 eop : IN STD_LOGIC;
+		 state_cnt: in std_logic_vector(12 downto 0);
 		 rd_en : OUT STD_LOGIC;
 		 rd_sel : OUT STD_LOGIC;
 		 rd_data_sel : OUT STD_LOGIC;
 		 oe : OUT STD_LOGIC;
-		 rd_continue_o : OUT STD_LOGIC;
 		 flag_o1 : OUT STD_LOGIC;
 		 flag_eop : OUT STD_LOGIC;
 		 rd_adr : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -72,6 +72,7 @@ COMPONENT ifft_ram_wr_ctr
 	PORT(rst_n : IN STD_LOGIC;
 		 clk : IN STD_LOGIC;
 		 sop : IN STD_LOGIC;
+		 state_cnt: in std_logic_vector(12 downto 0);
 		 din : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
 		 wr_en : OUT STD_LOGIC;
 		 wr_sel : OUT STD_LOGIC;
@@ -140,11 +141,11 @@ PORT MAP(rst_n => rst_n,
 		 clk => clk,
 		 sop => sop,
 		 eop => eop,
+		 state_cnt =>state_cnt,
 		 rd_en => rd_en_t,
 		 rd_sel => rd_sel_t,
 		 rd_data_sel => rd_data_sel_t,
 		 oe => ram_data_oe_t,
-		 rd_continue_o => rd_continue_o,
 		 flag_o1 => flag_o1,
 		 flag_eop => flag_eop,
 		 rd_adr => rd_adr_t,
@@ -156,6 +157,7 @@ b2v_inst1 : ifft_ram_wr_ctr
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
 		 sop => sop,
+		 state_cnt =>state_cnt,
 		 din => din,
 		 wr_en => wr_en_t,
 		 wr_sel => wr_sel_t,

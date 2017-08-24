@@ -1,34 +1,32 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 entity ifft_ram_rd_ctr is
   port(rst_n: in std_logic;
        clk: in std_logic;
        sop: in std_logic;
        eop: in std_logic;
+       state_cnt: in std_logic_vector(12 downto 0);
        rd_en:out std_logic;
        rd_adr:out std_logic_vector(7 downto 0);
        rd_sel:out std_logic;
        rd_data_sel:out std_logic;
        oe:out std_logic;
-	   rd_cnt_o:OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
-	   rd_continue_o:out std_logic;
-	   flag_o1:out std_logic;
-	   flag_eop:out std_logic;
-	   ram_aclr:out std_logic );
+	     rd_cnt_o:OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
+	     flag_o1:out std_logic;
+	     flag_eop:out std_logic;
+	     ram_aclr:out std_logic );
 end entity ifft_ram_rd_ctr;
 
 architecture rtl of ifft_ram_rd_ctr is
   signal eop_t,eop_t1,rd_sel_t,rd_sel_t1:std_logic;
-  type state_t is (s_rst,s_idle,s_rd,s_rd1,s_rd2);
+  type state_t is (s_rst,s_idle,s_rd);
   signal state,next_state:state_t;
   signal rd_adr_cnt_en:std_logic;
   signal rd_cnt:integer range 0 to 285;
   signal rd_en_t,oe_t,oe_t1,rd_en_t1:std_logic;
   signal flag:std_logic;
-  signal rd_continue:std_logic;
---  type state_t1 is (s0,s1,s2,s3);
---  signal sta,next_sta:state_t1;
   begin
     process(rst_n,clk) is
       begin
@@ -39,7 +37,7 @@ architecture rtl of ifft_ram_rd_ctr is
         end if;
     end process;
     
-    process(state,rst_n,eop_t,rd_cnt) is
+    process(state,rst_n,state_cnt,rd_cnt) is
       begin
          case state is
             when s_rst =>
@@ -50,32 +48,16 @@ architecture rtl of ifft_ram_rd_ctr is
               end if; 
               
             when s_idle =>
-              if eop_t='1' then
+              if state_cnt=2560 then
                  next_state<=s_rd;
               else
                  next_state<=s_idle;
               end if;
-            when s_rd =>
-	            if rd_cnt=255  then
-				      if eop_t='1'  then
-		                next_state<=s_rd1;
-			         else
-		               next_state<=s_rd2;
-						end if;
-					else
-					   next_state<=s_rd;
-			      end if;
-		      when s_rd1 =>					
-               if rd_cnt=285 then
-                    next_state<=s_rd;  
-               else
-                    next_state<=s_rd1; 
-               end if;
-				when s_rd2 =>					
-               if rd_cnt=285 then
+            when s_rd =>		
+                if state_cnt=4278 then
                     next_state<=s_idle;  
                else
-                    next_state<=s_rd2; 
+                    next_state<=s_rd; 
                end if;	
 		
           end case;  
@@ -93,62 +75,49 @@ architecture rtl of ifft_ram_rd_ctr is
 		   end if;
 		 end if;
 	end process;
+	
+	
     process(state) is
       begin
          case state is
             when s_rst =>
-              rd_en_t<='0';
-              rd_adr_cnt_en<='0';
-			  rd_continue<='0';
-			  
+              --rd_en_t<='0';
+              rd_adr_cnt_en<='0';			  
             when s_idle =>
-              rd_en_t<='0';
-              rd_adr_cnt_en<='0';
-			  rd_continue<='0';
-			 
-			when s_rd =>
-              rd_en_t<='1';
+              --rd_en_t<='0';
+              rd_adr_cnt_en<='0';			 
+			      when s_rd =>
+              --rd_en_t<='1';
               rd_adr_cnt_en<='1';
-			  rd_continue<='0'; 
-            			  
-            when s_rd1 =>
-              rd_en_t<='1';
-              rd_adr_cnt_en<='1';
-			  rd_continue<='1';
-			
-			when s_rd2 =>
-              rd_en_t<='1';
-              rd_adr_cnt_en<='1';
-			  rd_continue<='0';
-			
           end case;  
     end process; 
 
- --rd_en<=rd_en_t; 
-   process(rst_n,clk) is
-      begin
-        if rst_n='0' then
-             rd_en_t1<='0';
-        elsif clk'event and clk='1' then
-              rd_en_t1<=rd_en_t;  
-        end if;
-    end process;
+ --  process(rst_n,clk) is
+--      begin
+--        if rst_n='0' then
+--             rd_en_t1<='0';
+--        elsif clk'event and clk='1' then
+--              rd_en_t1<=rd_en_t;  
+--        end if;
+--    end process;
+
+ 
 	 
-	rd_en<=rd_en_t1;-- or rd_en_t;
+	 --rd_en<=rd_en_t;
 	
    process(rst_n,clk) is
       begin
         if rst_n='0' then
             rd_cnt<=0;
-				rd_sel_t<='1';
+				    rd_sel_t<='1';
         elsif clk'event and clk='1' then
            if rd_adr_cnt_en='1' then
                if rd_cnt=285 then
                   rd_cnt<=0;
-						rd_sel_t<= not rd_sel_t; 
+						      rd_sel_t<= not rd_sel_t; 
                else
                   rd_cnt<=rd_cnt+1;
-						rd_sel_t<=rd_sel_t; 
+						      rd_sel_t<=rd_sel_t; 
                end if;
            else
               rd_cnt<=0;
@@ -202,7 +171,7 @@ architecture rtl of ifft_ram_rd_ctr is
       begin
         if rst_n='0' then
             rd_data_sel<='0';
-			rd_sel_t1<='0';
+			      rd_sel_t1<='0';
         elsif clk'event and clk='1' then
             rd_sel_t1<=rd_sel_t;  
             rd_data_sel<=rd_sel_t1;  
@@ -213,15 +182,41 @@ process(rst_n,clk) is
       begin
         if rst_n='0' then
             oe_t1<='0';
-			oe_t<='0';
+			      oe_t<='0';
         elsif clk'event and clk='1' then
             oe_t<=rd_en_t1;  
             oe_t1<=oe_t;  
         end if;
     end process; 
 	
-    oe<=oe_t1 or oe_t;
-	--oe<='0';
+    --oe<=oe_t1 or oe_t;
+    --oe<=oe_t;
+    --oe<=rd_en_t1;  
+   process(rst_n,state_cnt) is
+       begin
+          if rst_n='0' then
+             rd_en<='0';
+         else
+           if state_cnt>=2562 and state_cnt<=4278 then
+              rd_en<='1';
+           else
+              rd_en<='0';
+           end if;
+         end if;
+       end process;
+         
+    process(rst_n,state_cnt) is
+       begin
+          if rst_n='0' then
+             oe<='0';
+         else
+           if state_cnt>=2562 and state_cnt<=4278 then
+              oe<='1';
+           else
+              oe<='0';
+           end if;
+         end if;
+       end process;
 	 
 process(clk) is
        begin
@@ -230,20 +225,15 @@ process(clk) is
            when s_rst =>
 				  flag<='0'; 
            when s_idle =>
-				  flag<='0'; 
+				  flag<=flag; 
            when s_rd =>
-				  flag<='0'; 
-			  when s_rd1 =>
-				  flag<='1';
-			  when s_rd2 =>
-				  flag<='1';
+				  flag<='1'; 
          end case;
 			end if;
      end process;	 
 	 
  
 
-rd_continue_o<=rd_continue;  
 --rd_cnt_o<=rd_cnt; 
 flag_o1<=flag; 
 flag_eop<=eop_t;
