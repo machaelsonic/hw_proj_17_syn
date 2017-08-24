@@ -18,9 +18,12 @@ function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft)
 %           end 
 %       end
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      
-       data_fft=fft(data_per_symbol,256);
+
+       %data_fft=fft(data_per_symbol,256);
+       data_fft=fft_ip_model(data_per_symbol,256,0) ;
        rt_r=real(pre_symbol.*data_fft);
+
+       
       %%%%%dpsk½âµ÷%%%%%%%%%%%%%%%%%%%%%%%%%%%
       for k=34:69
           if  rt_r(k)>0 

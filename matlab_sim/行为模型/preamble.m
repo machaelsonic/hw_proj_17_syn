@@ -64,6 +64,7 @@ end
 
 c=ifft(a,N);
 p=real(c);
+p=round(p*1023);%p符号量化为12位二进制数据,保留2位符号,10位有效数据
 m=0-p;
 
 output=[p p p p p p p p m m];

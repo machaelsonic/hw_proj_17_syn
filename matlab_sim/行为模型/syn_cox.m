@@ -70,7 +70,9 @@ syn_point;
  fft_data=data(syn_point+1728:syn_point+3443); % 2561~4276，接收数据，包含cp ,frame_syn(k1)>0.2
  m_rcv=data(syn_point+1472:syn_point+1727);%使用第二个m符号进行信道估计，2305~2560,frame_syn(k1)>0.2
  m_tx=0-p;
-  m_rcv_fft=fft(m_rcv,256);
+ 
+  %m_rcv_fft=fft(m_rcv,256);
+  [m_rcv_fft,exp1]=fft_ip_model(m_rcv,256,0) ;
   m_tx_fft=fft(m_tx,256);
   
   h=m_rcv_fft./m_tx_fft;

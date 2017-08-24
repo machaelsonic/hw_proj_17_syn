@@ -1,10 +1,10 @@
 clear
 clc
-SNR=3;% 信噪比 
+SNR=10;% 信噪比 
 noise_ctr=1;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
 payload_num=6; %payload的symbol个数
 m_phase=[10,9,8,7,6,4,2,15,11,7,3,14,9,3,13,6,15,7,15,7,14,5,10,0,5,10,14,2,5,8,10,11,13,14,15,15]; %m序列相位
-frame_num=100;%发送帧个数
+frame_num=10;%发送帧个数
 err_cnt=zeros(1,frame_num);%帧误码计数
 err_total=0; %总误码计数
 
@@ -14,18 +14,34 @@ for frame_id=1:frame_num
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%发送机代码%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     send_data_ifft_r=[];
     valid_data_tx=[];
+    send_data_ifft_r_rtl=[];
     for k1=1:payload_num
         %[load_data,valid_data]=data_gen;
         [load_data,valid_data,pre_phase_next]=data_gen(pre_phase);
-        data_gen_ifft_r=real(ifft(load_data,256));
+        
+        %%%%%%%%%%%理论FFT模型%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        data_gen_ifft_r=round(real(ifft(load_data,256)));
         cp=data_gen_ifft_r(227:256);
         send_data_ifft_r=[send_data_ifft_r cp data_gen_ifft_r];%6个payload数据，每个payload数据包含一个cp，
         %一个cp为30个采样点，共6*286=1716个采样点
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%RTL模型(使用FFT IP 核模型)
+        [data_gen_ifft_rtl, exp_out] = fft_ip_model(load_data,256,1) ;
+        data_gen_ifft_r_rtl=real(data_gen_ifft_rtl);
+        cp_rtl=data_gen_ifft_r_rtl(227:256);
+        send_data_ifft_r_rtl=[send_data_ifft_r_rtl cp_rtl data_gen_ifft_r_rtl];
+         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+         
+        
         valid_data_tx=[valid_data_tx valid_data];
         pre_phase=pre_phase_next;%生成下个payload symbol的参考相位
     end
+    %%%%%%%%%%%%%%理论模型与RTL模型的量化误差%%%%%%%%%%%%%%%%%%%%%%%%%%
+      quan_err=send_data_ifft_r_rtl-send_data_ifft_r*2^(8+exp_out(1));
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     [pre_data,p]=preamble;%生成前导序列，包含8个p符号和2个m符号，2560个采样点
-    tx_data=[pre_data send_data_ifft_r]; %发送到电力线上的数据， 共4276个采样点
+    tx_data=[pre_data*4 send_data_ifft_r_rtl]; %发送到电力线上的数据， 共4276个采样点,对前导序列放大4倍,实际设计过程中可根据具体数值进行调整
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%电力线信道%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %    rcv_data=tx_data;%理想信道
