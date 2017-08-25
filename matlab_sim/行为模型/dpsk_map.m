@@ -20,6 +20,7 @@ function [x,pre_phase_next]=dpsk_map(y,pre_phase)
 %         for k=M+1:1:M+C
 %             x(k)=exp(i*x_phase(k-M)*pi/8);
 %         end
+real(x);
 end
         
     

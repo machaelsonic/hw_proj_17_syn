@@ -4,10 +4,11 @@ SNR=10;% 信噪比
 noise_ctr=1;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
 payload_num=6; %payload的symbol个数
 m_phase=[10,9,8,7,6,4,2,15,11,7,3,14,9,3,13,6,15,7,15,7,14,5,10,0,5,10,14,2,5,8,10,11,13,14,15,15]; %m序列相位
+
 frame_num=10;%发送帧个数
 err_cnt=zeros(1,frame_num);%帧误码计数
 err_total=0; %总误码计数
-
+tx_data_matlab=[];
 for frame_id=1:frame_num
     
     pre_phase=m_phase;%生成第一个payload symbol的参考相位
@@ -17,7 +18,10 @@ for frame_id=1:frame_num
     send_data_ifft_r_rtl=[];
     for k1=1:payload_num
         %[load_data,valid_data]=data_gen;
-        [load_data,valid_data,pre_phase_next]=data_gen(pre_phase);
+        %data=rand(1,36);%产生随机数据
+         data= double(dec2bin(frame_id,36))-double('0');
+ 
+        [load_data,valid_data,valid_data_map,pre_phase_next]=data_gen(pre_phase,data);
         
         %%%%%%%%%%%理论FFT模型%%%%%%%%%%%%%%%%%%%%%%%%%%%
         data_gen_ifft_r=round(real(ifft(load_data,256)));
@@ -41,7 +45,10 @@ for frame_id=1:frame_num
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [pre_data,p]=preamble;%生成前导序列，包含8个p符号和2个m符号，2560个采样点
-    tx_data=[pre_data*4 send_data_ifft_r_rtl]; %发送到电力线上的数据， 共4276个采样点,对前导序列放大4倍,实际设计过程中可根据具体数值进行调整
+    tx_data=[pre_data*16 send_data_ifft_r_rtl*4]; %发送到电力线上的数据， 共4276个采样点,对前导序列放大4倍,实际设计过程中可根据具体数值进行调整
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    tx_data_matlab=[tx_data_matlab tx_data];
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%电力线信道%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %    rcv_data=tx_data;%理想信道
@@ -65,7 +72,12 @@ for frame_id=1:frame_num
     err_rate(1,frame_id)=err_cnt(1,frame_id)/(36*payload_num);
     err_total=err_total+err_cnt(1,frame_id);
 end 
-err_rate_total=err_total/(36*payload_num*frame_num)
+ err_rate_total=err_total/(36*payload_num*frame_num)
+ %%%%%%%%%%%%%%%%%%比较matlab模型与modelsim模型的发送数据%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ tx_data_o = load('e:\design\QUARTUS\plc_design_final.git\tb_tx_data_o.txt');%读取modelsim的仿真数据
+ tx_data_o =tx_data_o';
+ tx_data_compare=tx_data_matlab-tx_data_o;
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(1);
     subplot(5,1,1)
     plot(tx_data);
