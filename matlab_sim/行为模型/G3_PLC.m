@@ -1,11 +1,11 @@
 clear
 clc
-SNR=10;% 信噪比 
+SNR=5;% 信噪比 
 noise_ctr=1;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
 payload_num=6; %payload的symbol个数
 m_phase=[10,9,8,7,6,4,2,15,11,7,3,14,9,3,13,6,15,7,15,7,14,5,10,0,5,10,14,2,5,8,10,11,13,14,15,15]; %m序列相位
 
-frame_num=10;%发送帧个数
+frame_num=2;%发送帧个数
 err_cnt=zeros(1,frame_num);%帧误码计数
 err_total=0; %总误码计数
 tx_data_matlab=[];
@@ -74,9 +74,9 @@ for frame_id=1:frame_num
 end 
  err_rate_total=err_total/(36*payload_num*frame_num)
  %%%%%%%%%%%%%%%%%%比较matlab模型与modelsim模型的发送数据%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- tx_data_o = load('e:\design\QUARTUS\plc_design_final.git\tb_tx_data_o.txt');%读取modelsim的仿真数据
- tx_data_o =tx_data_o';
- tx_data_compare=tx_data_matlab-tx_data_o;
+%  tx_data_o = load('e:\design\QUARTUS\plc_design_final.git\tb_tx_data_o.txt');%读取modelsim的仿真数据
+%  tx_data_o =tx_data_o';
+%  tx_data_compare=tx_data_matlab-tx_data_o;
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(1);
     subplot(5,1,1)
