@@ -33,7 +33,7 @@ function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft)
           end 
       end
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       pre_symbol=conj(data_fft);
+        pre_symbol=conj(data_fft);
         valid_data_rcv=[valid_data_rcv valid_data_rcv_t];
     end   
 end
