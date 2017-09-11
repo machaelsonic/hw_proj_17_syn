@@ -1,69 +1,14 @@
-function [output,p]=preamble 
+function [output,p]=preamble(phase_data,fft_point,first_carrier_id,last_carrier_id) 
 
-N=256;
-M=33;
-C=36;
-%%%%%%%%%%%%%%%%%%%%%%;
-%b=[0 0.0381 0.1464 0.3087 0.5 0.6913 0.8536 0.9619];
-for k=1:1:M
-    a(k)=0;
+for k=1:fft_point
+    x(k)=0+i*0;
 end
-
-for k=M+C+1:1:N
-    a(k)=0;
+for k=first_carrier_id:last_carrier_id
+    x(k)=exp(i*phase_data(k)*pi/8);
 end
+ifft_x=ifft(x,fft_point);
+p=real(ifft_x);
 
-x(1)=2;
-x(2)=1;
-x(3)=0;
-x(4)=15;
-x(5)=14;
-
-x(6)=12;
-x(7)=10;
-x(8)=7;
-x(9)=3;
-x(10)=15;
-x(11)=11;
-x(12)=6;
-
-x(13)=1;
-x(14)=11;
-x(15)=5;
-x(16)=14;
-x(17)=7;
-
-x(18)=15;
-x(19)=7;
-x(20)=15;
-x(21)=6;
-x(22)=13;
-x(23)=2;
-x(24)=8;
-
-x(25)=13;
-x(26)=2;
-x(27)=6;
-x(28)=10;
-x(29)=13;
-
-x(30)=0;
-x(31)=2;
-x(32)=3;
-x(33)=5;
-x(34)=6;
-x(35)=7;
-x(36)=7;
-
-% for k=M:1:M+C-1
-%     a(k)=exp(i*x(k-M+1)*pi/8);
-% end
-for k=M+1:1:M+C
-    a(k)=exp(i*x(k-M)*pi/8);
-end
-
-c=ifft(a,N);
-p=real(c);
 p=round(p*1023);%p符号量化为12位二进制数据,保留2位符号,10位有效数据
 m=0-p;
 

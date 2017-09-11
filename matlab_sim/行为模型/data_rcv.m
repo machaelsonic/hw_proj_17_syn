@@ -1,10 +1,10 @@
-function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft)
+function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id)
     [N,M]=size(data);
     valid_data_rcv=[];
     pre_symbol=conj(m_rcv_fft);
     
     for k1=1:payload_num
-          data_per_symbol=data(31+(k1-1)*286:k1*286);
+          data_per_symbol=data(31+(k1-1)*(fft_point+30):k1*(fft_point+30));
           
           %data_fft_r=real(fft(data_per_symbol,256)./h);% 使用信道估计估计算法
           %data_fft_r=real(fft(data_per_symbol,256));%无信道估计算法
@@ -20,16 +20,16 @@ function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft)
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
        %data_fft=fft(data_per_symbol,256);
-       data_fft=fft_ip_model(data_per_symbol,256,0) ;
+       data_fft=fft_ip_model(data_per_symbol,fft_point,0) ;
        rt_r=real(pre_symbol.*data_fft);
 
        
       %%%%%dpsk解调%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      for k=34:69
+      for k=first_carrier_id:last_carrier_id
           if  rt_r(k)>0 
-               valid_data_rcv_t(k-33)=0;
+               valid_data_rcv_t(k-first_carrier_id+1)=0;
           else
-               valid_data_rcv_t(k-33)=1;
+               valid_data_rcv_t(k-first_carrier_id+1)=1;
           end 
       end
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
