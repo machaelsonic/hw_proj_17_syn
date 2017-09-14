@@ -21,7 +21,7 @@ end
  load_data=zeros(1,fft_point); 
 
 for k=first_carrier_id:last_carrier_id
-     load_data(k)=valid_data_map(k-first_carrier_id+1);%在有效子载波上装载调制后的待发送数据,34传送高位,
+     load_data(k)=valid_data_map(k-first_carrier_id+1);%在有效子载波上装载调制后的待发送数据,first_carrier_id传送高位,
 end
 
 

@@ -1,4 +1,4 @@
-function [frame_syn,symbol_syn,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft]=syn_cox(data,p,fft_point)
+function [frame_syn,symbol_syn,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft]=syn_cox(data,p,fft_point,payload_num)
 [N,M]=size(data);
 s=zeros(1,2*fft_point);
 s_a_buff=zeros(1,fft_point);
@@ -27,34 +27,19 @@ for k1=1:M
      if flag==0 
          start_point=k1;
          flag=1;
-         syn_point=start_point+fft_point+20;
          s_a_buff=s_a;
      end
-%      k2=k2+1;
-%      if k2==1024
-%         s_a_buff=s_a;
-%         k2=0;
-%       end
-     symbol_syn(k1)=sum(s_a_buff.*s_b)/sum(s_a_buff.^2);% OFDM符号同步信号,与信号能量无关
+    symbol_syn(k1)=sum(s_a_buff.*s_b)/sum(s_a_buff.^2);% OFDM符号同步信号,与信号能量无关
 %%%%%%%%求OFDM同步点%%%%%%%%%%%%%%%%
 
-      if (k1>=start_point+fft_point+20) &&(k1<=start_point+2*fft_point+20)
-
- %%%%%%%%%%%%%%%%%%%%%%%%%%精同步查找同步点%%%%%%%%%%%%%%%%%%%%%%%
-       if  symbol_syn(k1)>max_symbol_syn 
-            max_symbol_syn=symbol_syn(k1);
-            syn_point=k1;  
-       end
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-
-      end  
+  
   end
  end
-syn_point=syn_point-40;
-%syn_point=syn_point-100;
+syn_point=start_point+2008;
+
  %%%%%%%%%%%%%%%%%FFT window%%%%%%%%%%
  for k1=1:M+1
-        if (k1>=syn_point+6880) && (k1<=syn_point+13203)  % 接收数据，包含cp,frame_syn(k1)>0.4
+  if (k1>=syn_point+6880) && (k1<=syn_point+15771)  % 接收数据，包含cp,frame_syn(k1)>0.4
             fft_point_cnt=fft_point_cnt+1;
             fft_window(k1)=1;
         else
@@ -67,7 +52,8 @@ syn_point=syn_point-40;
 start_point;
 syn_point;
 
- fft_data=data(syn_point+6880:syn_point+13203); % 10241~16564，接收数据，包含cp ,frame_syn(k1)>0.2
+fft_data=data(syn_point+6880:syn_point+15771); % 10241~16564，接收数据，包含cp ,frame_syn(k1)>0.2
+ 
  m_rcv=data(syn_point+5856:syn_point+6879);%使用第二个m符号进行信道估计，9217~10240,frame_syn(k1)>0.2
  m_tx=0-p;
  
