@@ -14,10 +14,10 @@ cp_num=458;%循环前缀的点数
 frame_length=fft_point*10+payload_num*(fft_point+cp_num); %19132;
 
 phase_data=load('E:\design\QUARTUS\plc_design_final.git\matlab_sim\行为模型\phase_rev.txt'); %从文件中读取前导序列相位
-%phase_data=phase_data';
- %根据使用的子载波情况生成m序列相位
+%phase_data=phase_data-1;
+ %根据使用的子载波情况生成m符号相位
 for k1=first_carrier_id:last_carrier_id
-    if phase_data(1,k1)>8 
+    if phase_data(1,k1)>=8 
        m_phase(1,k1-first_carrier_id+1)=phase_data(1,k1)-8;
     else
        m_phase(1,k1-first_carrier_id+1)=phase_data(1,k1)+8;
@@ -53,7 +53,7 @@ for frame_id=1:frame_num
         data_gen_ifft_r_rtl=real(data_gen_ifft_rtl);
         cp_rtl=data_gen_ifft_r_rtl(fft_point-cp_num+1:fft_point);
         send_data_ifft_r_rtl=[send_data_ifft_r_rtl cp_rtl data_gen_ifft_r_rtl];
-         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
          
         
         valid_data_tx=[valid_data_tx valid_data];
@@ -65,6 +65,7 @@ for frame_id=1:frame_num
     
     [pre_data,p]=preamble(phase_data,fft_point,first_carrier_id,last_carrier_id);%生成前导序列，包含8个p符号和2个m符号，10240个采样点
     tx_data=[pre_data*16 send_data_ifft_r_rtl*4]; %发送到电力线上的数据， 共19132个采样点,对前导序列放大16倍,实际设计过程中可根据具体数值进行调整
+    
     for k=1:frame_length
         if tx_data(k)>1023
             tx_data(k)=1023;
@@ -81,13 +82,15 @@ for frame_id=1:frame_num
     %    rcv_data=tx_data;%理想信道
     %   [rcv_data,NOISE] = noisegen(tx_data,SNR);
       [rcv_data,ht,trms,t_max]=PLC_channel(tx_data,1,noise_ctr,SNR);
-    rcv_data_ex=[rcv_data zeros(1,400)]; %扩展接收数据,防止定位点后移导致数据数组索引超范围
+    rcv_data_ex=[rcv_data zeros(1,600)]; %扩展接收数据,防止定位点后移导致数据数组索引超范围
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%接收机代码%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %[X1,Z1,c,syn_point,start_point,fft_window,fft_point,fft_data,h]=syn_self(rcv_data,p);
-    [frame_syn,symbol_syn,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft]=syn_cox(rcv_data_ex,p,fft_point,payload_num);
+    [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(rcv_data_ex,p,fft_point,payload_num);
     %h1=fft(fft_data,256)./fft(tx_data(syn_point+2207:syn_point+2462),256);
     %valid_data_rcv=data_rcv(fft_data,h,payload_num);
+    
+    
     syn_point_vec(frame_id)=syn_point;% 同步点滑动范围
     start_point_vec(frame_id)=start_point;%起始点滑动范围
     valid_data_rcv=data_rcv(fft_data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num);
@@ -102,22 +105,19 @@ for frame_id=1:frame_num
 end 
  err_rate_total=err_total/(carrier_num*payload_num*frame_num)
  %%%%%%%%%%%%%%%%%%比较matlab模型与modelsim模型的发送数据%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  tx_data_o = load('e:\design\QUARTUS\plc_design_final.git\tb_tx_data_o.txt');%读取modelsim的仿真数据
-%  tx_data_o =tx_data_o';
-%  tx_data_compare=tx_data_matlab-tx_data_o;
+%   tx_data_o = load('e:\design\QUARTUS\plc_design_final.git\tb_tx_data_o.txt');%读取modelsim的仿真数据
+%   tx_data_o =tx_data_o';
+%   tx_data_compare=tx_data_matlab-tx_data_o;
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(1);
-    subplot(5,1,1)
+    subplot(4,1,1)
     plot(tx_data);
-    subplot(5,1,2)
-    plot(rcv_data,'r');
-    subplot(5,1,3)
+    subplot(4,1,2)
+    plot(data_delay,'r');
+    subplot(4,1,3)
     %plot(Z1);
     plot(frame_syn);
-    subplot(5,1,4)
-    %plot(c);
-    plot(symbol_syn);
-    subplot(5,1,5)
+    subplot(4,1,4)
     plot(fft_window);
     figure(2)
     plot(valid_data_rcv-valid_data_tx);
@@ -126,12 +126,10 @@ end
     figure(4)
     plot(abs(m_rcv_fft));
     figure(5)
-    subplot(3,1,1)
-     plot(syn_point_vec);
-     subplot(3,1,2)
-     plot(start_point_vec);
-     subplot(3,1,3)
-     plot(syn_point_vec-start_point_vec);
+    subplot(2,1,1)
+     plot(syn_point_vec);% 同步点的抖动情况
+     subplot(2,1,2)
+     plot(start_point_vec);% 起始点的抖动情况
     figure(6)
     plot(err_rate);
     % figure(4)
