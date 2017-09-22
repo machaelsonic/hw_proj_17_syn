@@ -1,7 +1,7 @@
 clear
 clc
 SNR=9;% 信噪比 
-noise_ctr=1;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
+noise_ctr=0;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
 payload_num=6; %payload的symbol个数
 
 first_carrier_id=81;%起始子载波编号
@@ -11,8 +11,8 @@ carrier_num=416;%使用的子载波个数
 fft_point=1024;% FFT点数
 cp_num=458;%循环前缀的点数
 
-frame_length=fft_point*10+payload_num*(fft_point+cp_num); %19132;
-
+frame_length=fft_point*10+payload_num*(fft_point+cp_num); %帧长度=19132;
+ofdm_window_offset=50;%定义ofdm窗口的提前量
 phase_data=load('E:\design\QUARTUS\plc_design_final.git\matlab_sim\行为模型\phase_rev.txt'); %从文件中读取前导序列相位
 %phase_data=phase_data-1;
  %根据使用的子载波情况生成m符号相位
@@ -79,21 +79,21 @@ for frame_id=1:frame_num
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%电力线信道%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %    rcv_data=tx_data;%理想信道
+     %   rcv_data=tx_data;%理想信道
     %   [rcv_data,NOISE] = noisegen(tx_data,SNR);
       [rcv_data,ht,trms,t_max]=PLC_channel(tx_data,1,noise_ctr,SNR);
     rcv_data_ex=[rcv_data zeros(1,600)]; %扩展接收数据,防止定位点后移导致数据数组索引超范围
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%接收机代码%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %[X1,Z1,c,syn_point,start_point,fft_window,fft_point,fft_data,h]=syn_self(rcv_data,p);
-    [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(rcv_data_ex,p,fft_point,payload_num);
+    [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(rcv_data_ex,p,fft_point,payload_num,ofdm_window_offset);
     %h1=fft(fft_data,256)./fft(tx_data(syn_point+2207:syn_point+2462),256);
     %valid_data_rcv=data_rcv(fft_data,h,payload_num);
     
     
     syn_point_vec(frame_id)=syn_point;% 同步点滑动范围
     start_point_vec(frame_id)=start_point;%起始点滑动范围
-    valid_data_rcv=data_rcv(fft_data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num);
+    [valid_data_rcv,rt_r,rt_j]=data_rcv(fft_data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num);
     %%%%%%%%%%%%误码率统计%%%%%%%%%%%%%%%%%%%%%
     for k=1:carrier_num*payload_num
         if valid_data_rcv(k)~=valid_data_tx(k)
@@ -132,9 +132,10 @@ end
      plot(start_point_vec);% 起始点的抖动情况
     figure(6)
     plot(err_rate);
-    % figure(4)
-    % plot(h1,'r');
-
+    figure(7)
+    plot(rt_r,'r');
+    hold on
+    plot(rt_j);
   
 
 

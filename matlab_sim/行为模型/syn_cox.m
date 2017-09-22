@@ -1,4 +1,4 @@
-function [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(data,p,fft_point,payload_num)
+function [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(data,p,fft_point,payload_num,ofdm_window_offset)
 [N,M]=size(data);
 data=[data zeros(1,1024)];
 data_delay=[zeros(1,1024) data];%延时1024个采样点，在FPGA实现时，可采用s_a的移位输出实现1024点延时
@@ -25,7 +25,7 @@ start_point=0;
 fft_point_cnt=0;
 m_rcv_cnt=0;
 syn_point=0;
-
+state_cnt=0;
 for k1=1:M+fft_point-1
    for k=2*fft_point:-1:1
        s(1,k+1)=s(1,k);
@@ -74,42 +74,58 @@ for k1=1:M+fft_point-1
               cnt3=0;
               frame_cnt=0;%接收计数器清零
          case 1  
-              frame_cnt=frame_cnt+1; %检测到同步序列后，接收计数器开始工作，
-              if  frame_syn_rtl(k1)<-300 
+               frame_cnt=frame_cnt+1; %检测到同步序列后，接收计数器开始工作，
+               state_cnt=state_cnt+1; %状态超时判断计数器
+              if state_cnt<10240 
+                if  frame_syn_rtl(k1)<-300 
                     cnt1=cnt1+1;
                     if cnt1>3  %连续三次超过阈值
                        state=2;
                        cnt2=0;
                        min_frame_syn=frame_syn_rtl(k1);
+                       state_cnt=0;
                     else
                        state=1;
                     end
-               else
+                else
                   cnt1=0;
-               end
-
+                end
+              else
+                state=0;
+                cnt0=0;
+                state_cnt=0;
+              end
          case 2 
              frame_cnt=frame_cnt+1; 
-             if (frame_syn_rtl(k1)>min_frame_syn)
+             state_cnt=state_cnt+1;%状态超时判断计数器
+             if state_cnt<5000
+               if (frame_syn_rtl(k1)>min_frame_syn)
                   cnt2=cnt2+1;
                   if cnt2>500 %连续判断501个点，若一直处在上升阶段，则结束最小值搜寻
                      state=3;
                      cnt3=0;
                      syn_point_min=frame_cnt;
-                     syn_point_ref=k1;%最小值的参考点，syn_point_ref+（1024-501）=10241，                                      
+                     syn_point_ref=k1;%最小值的参考点，syn_point_ref+（1024-501）=10241， 
+                     state_cnt=0;
                   else
                      state=2;
                   end
-             else  %(frame_syn_rtl(k1)< min_frame_syn) 
+               else  %(frame_syn_rtl(k1)< min_frame_syn) 
                   cnt2=0;
                    min_frame_syn=frame_syn_rtl(k1); 
-             end 
+               end
+             else
+               state=0;
+               cnt0=0;
+               state_cnt=0;
+             end
 
          case 3
               frame_cnt=frame_cnt+1; 
               if k1==M+fft_point-1 
                   state=0; %回归初始状态
                   cnt0=0;
+                  state_cnt=0;
               else
                   state=3;
               end
@@ -131,15 +147,15 @@ for k1=1:M+fft_point-1
 %%%%%%%%求OFDM同步点%%%%%%%%%%%%%%%% 
   %%%%%%%%%%%%%%%%%FFT window%%%%%%%%%%
  
-  if cnt3>=523 && cnt3<=523+1023 %在状态2判断了501个采样点，因此此处的计数值位1024-501=523
+  if cnt3>=523-ofdm_window_offset && cnt3<=523+1023-ofdm_window_offset  %在状态2判断了501个采样点，因此此处的计数值位1024-501=523
       m_rcv_cnt=m_rcv_cnt+1;
       m_rcv(m_rcv_cnt)=data_delay(1,k1);%使用第二个m符号进行信道估计，
   end
   
-   if cnt3>=524+1023 && cnt3<=524+1023+8891
+   if cnt3>=524+1023-ofdm_window_offset  && cnt3<=524+1023+8891-ofdm_window_offset
             if flag==0
                 syn_point=k1;%在fpga实现时这个数值是测不出来的，但可以测出cnt3，cnt3=524+1023时为开窗点
-                                      %在matlab模型中用来评估OFDM窗口的抖动情况,理论值位10241+1024=10265
+                                      %在matlab模型中用来评估OFDM窗口的抖动情况,理论值为10241+1024=11265
                 flag=1;
             end
             fft_point_cnt=fft_point_cnt+1;

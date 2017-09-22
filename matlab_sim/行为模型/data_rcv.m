@@ -1,4 +1,4 @@
-function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num)
+function [valid_data_rcv,rt_r,rt_j]=data_rcv(data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num)
     [N,M]=size(data);
     valid_data_rcv=[];
     pre_symbol=conj(m_rcv_fft);
@@ -19,10 +19,10 @@ function valid_data_rcv=data_rcv(data,h,payload_num,m_rcv_fft,fft_point,first_ca
 %       end
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-       %data_fft=fft(data_per_symbol,256);
+     %data_fft=fft(data_per_symbol,fft_point);
        data_fft=fft_ip_model(data_per_symbol,fft_point,0) ;
        rt_r=real(pre_symbol.*data_fft);
-
+       rt_j=imag(pre_symbol.*data_fft);
        
       %%%%%dpsk½âµ÷%%%%%%%%%%%%%%%%%%%%%%%%%%%
       for k=first_carrier_id:last_carrier_id
