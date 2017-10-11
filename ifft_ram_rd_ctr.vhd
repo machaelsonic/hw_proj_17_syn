@@ -5,116 +5,54 @@ use ieee.std_logic_unsigned.all;
 entity ifft_ram_rd_ctr is
   port(rst_n: in std_logic;
        clk: in std_logic;
-       sop: in std_logic;
-       eop: in std_logic;
-       state_cnt: in std_logic_vector(12 downto 0);
+       state_cnt: in std_logic_vector(14 downto 0);
        rd_en:out std_logic;
-       rd_adr:out std_logic_vector(7 downto 0);
+       rd_adr:out std_logic_vector(9 downto 0);
        rd_sel:out std_logic;
        rd_data_sel:out std_logic;
        oe:out std_logic;
-	     rd_cnt_o:OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
-	     flag_o1:out std_logic;
-	     flag_eop:out std_logic;
-	     ram_aclr:out std_logic );
+	     rd_cnt_o:OUT STD_LOGIC_VECTOR(10 DOWNTO 0));
 end entity ifft_ram_rd_ctr;
 
 architecture rtl of ifft_ram_rd_ctr is
-  signal eop_t,eop_t1,rd_sel_t,rd_sel_t1:std_logic;
-  type state_t is (s_rst,s_idle,s_rd);
-  signal state,next_state:state_t;
+  signal rd_sel_t:std_logic;
+
   signal rd_adr_cnt_en:std_logic;
-  signal rd_cnt:integer range 0 to 285;
-  signal rd_en_t,oe_t,oe_t1,rd_en_t1:std_logic;
-  signal flag:std_logic;
+  signal rd_cnt:integer range 0 to 1481;
+  signal rd_en_t:std_logic;
   begin
-    process(rst_n,clk) is
+
+
+process(state_cnt) is
+  begin
+     if state_cnt>=10242 and state_cnt<=19133 then --?tx_ctr?send_data_valid??2677?????
+       rd_adr_cnt_en<='1';
+       rd_en_t<='1';
+    else
+       rd_adr_cnt_en<='0';
+       rd_en_t<='0';
+     end if;
+   end process;
+	rd_en<=rd_en_t;
+	 process(rst_n,clk) is
       begin
         if rst_n='0' then
-            state<=s_rst;
+            oe<='0';
         elsif clk'event and clk='1' then
-            state<=next_state;
+            oe<=rd_en_t;  
         end if;
     end process;
-    
-    process(state,rst_n,state_cnt,rd_cnt) is
-      begin
-         case state is
-            when s_rst =>
-              if rst_n='1' then
-                 next_state<=s_idle;
-              else
-                 next_state<=s_rst;
-              end if; 
-              
-            when s_idle =>
-              if state_cnt=2560 then
-                 next_state<=s_rd;
-              else
-                 next_state<=s_idle;
-              end if;
-            when s_rd =>		
-                if state_cnt=4278 then
-                    next_state<=s_idle;  
-               else
-                    next_state<=s_rd; 
-               end if;	
-		
-          end case;  
-    end process;
-	
-	process(rst_n,clk) is
-	  begin  
-	    if rst_n='0' then 
-		   ram_aclr<='1';
-		 elsif clk'event and clk='1' then 
-		   if next_state=s_idle and state/=s_idle then
-		     ram_aclr<='1';
-			else 
-			 ram_aclr<='0';
-		   end if;
-		 end if;
-	end process;
-	
-	
-    process(state) is
-      begin
-         case state is
-            when s_rst =>
-              --rd_en_t<='0';
-              rd_adr_cnt_en<='0';			  
-            when s_idle =>
-              --rd_en_t<='0';
-              rd_adr_cnt_en<='0';			 
-			      when s_rd =>
-              --rd_en_t<='1';
-              rd_adr_cnt_en<='1';
-          end case;  
-    end process; 
 
- --  process(rst_n,clk) is
---      begin
---        if rst_n='0' then
---             rd_en_t1<='0';
---        elsif clk'event and clk='1' then
---              rd_en_t1<=rd_en_t;  
---        end if;
---    end process;
-
- 
-	 
-	 --rd_en<=rd_en_t;
-	
-   process(rst_n,clk) is
+    process(rst_n,clk) is
       begin
         if rst_n='0' then
             rd_cnt<=0;
 				    rd_sel_t<='1';
         elsif clk'event and clk='1' then
            if rd_adr_cnt_en='1' then
-               if rd_cnt=285 then
+               if rd_cnt=1481 then
                   rd_cnt<=0;
-						      rd_sel_t<= not rd_sel_t; 
+						      rd_sel_t<=not rd_sel_t;
                else
                   rd_cnt<=rd_cnt+1;
 						      rd_sel_t<=rd_sel_t; 
@@ -123,119 +61,30 @@ architecture rtl of ifft_ram_rd_ctr is
               rd_cnt<=0;
            end if;
         end if;
-    end process; 
-    
-  process(rst_n,clk) is
+    end process;
+       
+  process(rst_n,rd_cnt) is
     begin
      if rst_n='0' then
         rd_adr<=(others=>'0');
-     elsif clk'event and clk='1' then  
+     else 
       case rd_cnt is
-        when 0 to 29 => rd_adr<=CONV_STD_LOGIC_VECTOR(rd_cnt+226,8);
-        when 30 to 285 => rd_adr<=CONV_STD_LOGIC_VECTOR(rd_cnt-30,8);  
+        when 0 to 457 => rd_adr<=CONV_STD_LOGIC_VECTOR(rd_cnt+566,10);
+        when 458 to 1481 => rd_adr<=CONV_STD_LOGIC_VECTOR(rd_cnt-458,10);  
         when others =>null;
       end case;
     end if;
   end process; 
-  
-  process(rst_n,clk) is
-      begin
-        if rst_n='0' then
-             eop_t1<='0';
-        elsif clk'event and clk='1' then
-              eop_t1<= eop;   
-        end if;
-    end process;
-	 
-  process(eop_t1,eop,flag) is
-      begin
-        if flag='0' then
-          eop_t<=eop;
-        else
-          eop_t<=eop_t1;
-        end if;
-  end process;  
-  
-  
 
- process(rst_n,clk) is
-      begin
-        if rst_n='0' then
-            rd_sel<='0';
-        elsif clk'event and clk='1' then
-            rd_sel<=rd_sel_t;  
-        end if;
-    end process; 
-    
+ rd_sel<=rd_sel_t;  
  process(rst_n,clk) is
       begin
         if rst_n='0' then
             rd_data_sel<='0';
-			      rd_sel_t1<='0';
         elsif clk'event and clk='1' then
-            rd_sel_t1<=rd_sel_t;  
-            rd_data_sel<=rd_sel_t1;  
+            rd_data_sel<=rd_sel_t;  
         end if;
     end process;  
-       
-process(rst_n,clk) is
-      begin
-        if rst_n='0' then
-            oe_t1<='0';
-			      oe_t<='0';
-        elsif clk'event and clk='1' then
-            oe_t<=rd_en_t1;  
-            oe_t1<=oe_t;  
-        end if;
-    end process; 
-	
-    --oe<=oe_t1 or oe_t;
-    --oe<=oe_t;
-    --oe<=rd_en_t1;  
-   process(rst_n,state_cnt) is
-       begin
-          if rst_n='0' then
-             rd_en<='0';
-         else
-           if state_cnt>=2562 and state_cnt<=4278 then
-              rd_en<='1';
-           else
-              rd_en<='0';
-           end if;
-         end if;
-       end process;
-         
-    process(rst_n,state_cnt) is
-       begin
-          if rst_n='0' then
-             oe<='0';
-         else
-           if state_cnt>=2562 and state_cnt<=4278 then
-              oe<='1';
-           else
-              oe<='0';
-           end if;
-         end if;
-       end process;
-	 
-process(clk) is
-       begin
-		  if clk'event and clk='1' then
-         case state is
-           when s_rst =>
-				  flag<='0'; 
-           when s_idle =>
-				  flag<=flag; 
-           when s_rd =>
-				  flag<='1'; 
-         end case;
-			end if;
-     end process;	 
-	 
- 
 
---rd_cnt_o<=rd_cnt; 
-flag_o1<=flag; 
-flag_eop<=eop_t;
-rd_cnt_o<=conv_std_logic_vector(rd_cnt,9);
+rd_cnt_o<=conv_std_logic_vector(rd_cnt,11);
   end architecture rtl;    

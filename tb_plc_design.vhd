@@ -9,12 +9,13 @@ end entity tb_plc_design;
 architecture rtl of tb_plc_design is 
 
 component plc_design 
-   PORT
+  PORT
 	(
 		clk_tx :  IN  STD_LOGIC;
 		rst_n_tx :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		datain :  IN  STD_LOGIC_VECTOR(35 DOWNTO 0);
+		datain :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		receiver_din: IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_sink_ready :  OUT  STD_LOGIC;
 		ifft_source_sop :  OUT  STD_LOGIC;
 		ifft_source_eop :  OUT  STD_LOGIC;
@@ -29,7 +30,6 @@ component plc_design
 		ram_data_valid :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
 		fft_sink_ready :  OUT  STD_LOGIC;
-		pre_cnt :  OUT  STD_LOGIC;
 		fft_source_sop :  OUT  STD_LOGIC;
 		fft_source_eop :  OUT  STD_LOGIC;
 		fft_source_valid :  OUT  STD_LOGIC;
@@ -43,21 +43,18 @@ component plc_design
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
-		rd_continue_o :  OUT  STD_LOGIC;
 		flag_o1 :  OUT  STD_LOGIC;
 		flag_eop :  OUT  STD_LOGIC;
-		a_r :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		cnt :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
-		cnt_o :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		demap_dout :  OUT  STD_LOGIC_VECTOR(35 DOWNTO 0);
+		tx_cnt :  OUT  STD_LOGIC_VECTOR(14 DOWNTO 0);
+		rx_cnt:out integer range 0 to 13999;
+		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		--demap_out :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		fft_source_error :  OUT  STD_LOGIC_VECTOR(1 DOWNTO 0);
 		fft_source_exp :  OUT  STD_LOGIC_VECTOR(5 DOWNTO 0);
 		fft_source_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_imag_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		fft_source_imag_delay_1 :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_real_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		fft_source_real_delay_1 :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_data :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ifft_dout_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_dout_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -65,31 +62,33 @@ component plc_design
 		ifft_source_exp :  OUT  STD_LOGIC_VECTOR(5 DOWNTO 0);
 		ifft_source_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		max_p :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		p_cnt_o :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		ifft_source_valid: out std_logic;
 		pre_win_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		pre_inverse:out std_logic;
 		ram1_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram2_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		ram_rd_data :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ram_wr_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		ram_wr_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		rcv_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		rcv_data_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		rd_cnt_o :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		rd_cnt_o :  OUT  STD_LOGIC_VECTOR(10 DOWNTO 0);
+		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
+		rt_i: out STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		x_cor1 :  OUT  STD_LOGIC_VECTOR(20 DOWNTO 0);
-		x_cor2 :  OUT  STD_LOGIC_VECTOR(20 DOWNTO 0)
+		c0:out std_logic;
+		c1:out std_logic
 	);
 END component plc_design;
 
-signal cnt_1:integer range 0 to 2299;
-signal tmp,datain :std_logic_vector(35 downto 0);
+signal cnt_1:integer range 0 to 25999;
+signal tmp,datain,demap_dout :std_logic_vector(415 downto 0);
 signal d_t:std_logic;
 signal rst_n_tx,clk_tx,en:std_logic;
-
+signal tx_data_o_t,receiver_din:std_logic_vector(11 downto 0);
+signal demap_out :std_logic_vector(15 downto 0);
 begin
 
 
@@ -120,11 +119,11 @@ END PROCESS ;
  process(rst_n_tx,clk_tx) is
 		  begin
 		    if rst_n_tx='0' then
-			    cnt_1<=2100;
+			    cnt_1<=25900;
 				 d_t<='0';
 				 tmp<=(others=>'0');
 			 elsif clk_tx'event and clk_tx='1' then
-			    if cnt_1=2299 then
+			    if cnt_1=25999 then
 				    cnt_1<=0;
 					 d_t<='1';
 					 tmp<=tmp+1;
@@ -143,10 +142,17 @@ datain<=tmp;
 
 u1: plc_design PORT map 
 	(
-		clk_tx,
-		rst_n_tx,
-		en,
-		datain);
+		clk_tx =>clk_tx,
+		rst_n_tx=>rst_n_tx,
+		en =>en,
+		datain=>datain,
+		receiver_din => receiver_din,
+		demap_dout =>demap_dout,
+		tx_data_o =>tx_data_o_t);
+		
+		receiver_din<=tx_data_o_t;
+		
+		
 		-- ram_rd_en,
 		-- ram_wr_en,
 		-- tx_data_valid,

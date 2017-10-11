@@ -4,14 +4,14 @@ use ieee.std_logic_unsigned.all;
 entity en_gen is
   port(rst_n: in std_logic;
        clk: in std_logic;
-		 ifft_eop:in std_logic;
-		 d:out std_logic;
-		 dout:out std_logic_vector(35 downto 0));
+		   ifft_eop:in std_logic;
+		   d:out std_logic;
+		   dout:out std_logic_vector(415 downto 0));
 end entity en_gen;
 
 architecture rtl of en_gen is
 signal cnt:integer range 0 to 2299;
-signal tmp:std_logic_vector(35 downto 0);
+signal tmp:std_logic_vector(415 downto 0);
 signal d_t:std_logic;
 --type state_t is (s_rst,s_idle,s1,s2);
 --signal state,next_state: state_t;
@@ -89,6 +89,6 @@ signal d_t:std_logic;
 --	
 --
 d<=d_t;
---dout<=tmp;
-dout<="101001011010010110100101101001011010";
+dout<=tmp;
+--dout<="101001011010010110100101101001011010";
 end architecture rtl;

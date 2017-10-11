@@ -35,68 +35,46 @@ ENTITY receiver IS
 		demap_sink_sop :  OUT  STD_LOGIC;
 		demap_sink_eop :  OUT  STD_LOGIC;
 		demap_sink_valid :  OUT  STD_LOGIC;
-		pre_cnt :  OUT  STD_LOGIC;
 		fft_sop :  OUT  STD_LOGIC;
 		fft_eop :  OUT  STD_LOGIC;
 		fft_data_valid :  OUT  STD_LOGIC;
-		a_r :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		cnt_o :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		demap_dout :  OUT  STD_LOGIC_VECTOR(35 DOWNTO 0);
-		fft_source_eeror :  OUT  STD_LOGIC_VECTOR(1 DOWNTO 0);
+		cnt_o:out integer range 0 to 13999;
+		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		fft_source_error :  OUT  STD_LOGIC_VECTOR(1 DOWNTO 0);
 		fft_source_exp :  OUT  STD_LOGIC_VECTOR(5 DOWNTO 0);
 		fft_source_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_imag_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		fft_source_imag_delay_1 :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		fft_source_real_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		fft_source_real_delay_1 :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		max_p :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		max_value :  OUT  STD_LOGIC_VECTOR(20 DOWNTO 0);
-		p_cnt_o :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
 		rcv_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		rcv_data_delay :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		rt_i :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
-		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		x_cor1 :  OUT  STD_LOGIC_VECTOR(20 DOWNTO 0);
-		x_cor2 :  OUT  STD_LOGIC_VECTOR(20 DOWNTO 0);
-		rcv_data_valid:out std_logic
+		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0)
 	);
 END receiver;
 
 ARCHITECTURE bdf_type OF receiver IS 
 
-COMPONENT x_cor
-	PORT(rst_n : IN STD_LOGIC;
-		 clk : IN STD_LOGIC;
-		 din : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-		 dout1 : OUT STD_LOGIC_VECTOR(20 DOWNTO 0);
-		 dout2 : OUT STD_LOGIC_VECTOR(20 DOWNTO 0)
-	);
-END COMPONENT;
+COMPONENT syn_cox is
+   port(rst_n: in std_logic;
+       clk: in std_logic;
+       din: in std_logic_vector(11 downto 0);
+       dout1:out std_logic_vector(31 downto 0);
+       dout2:out std_logic_vector(31 downto 0);
+       dout:out std_logic_vector(11 downto 0));
+end COMPONENT syn_cox;
 
-COMPONENT div
-	PORT(rst_n : IN STD_LOGIC;
-		 clk : IN STD_LOGIC;
-		 din2 : IN STD_LOGIC_VECTOR(20 DOWNTO 0);
-		 pre_cnt_o : OUT STD_LOGIC;
-		 cnt_o : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
-		 max_p : OUT STD_LOGIC_VECTOR(8 DOWNTO 0);
-		 max_value : OUT STD_LOGIC_VECTOR(20 DOWNTO 0);
-		 p_cnt_o : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-		 syn_point : OUT STD_LOGIC_VECTOR(8 DOWNTO 0)
-	);
-END COMPONENT;
-
-COMPONENT sop_eop_gen
-	port(rst_n: in std_logic;
-	     clk: in std_logic;
-		  pre_cnt: in std_logic;
-		  sop:out std_logic;
-		  eop:out std_logic;
-		  data_valid:out std_logic;
-		  rcv_data_valid:out std_logic);
-END COMPONENT;
+COMPONENT fft_ctr is
+  port(rst_n: in std_logic;
+       clk: in std_logic;
+       dout1:in std_logic_vector(31 downto 0);
+       dout2:in std_logic_vector(31 downto 0);
+       cnt_o:out integer range 0 to 13999;
+       fft_data_valid:out std_logic;
+       sink_sop:out std_logic;
+       sink_eop:out std_logic;
+       payload_data_valid:out std_logic);
+end COMPONENT fft_ctr;
 
 COMPONENT mult_complex_ip
 	PORT(dataa_imag : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -137,138 +115,98 @@ COMPONENT fft_ip
 	);
 END COMPONENT;
 
-COMPONENT fifo_256
+COMPONENT fifo_1024
  generic(N: integer );
     port( rst_n: in std_logic;
-         clk: in std_logic;
-		 en:in std_logic;
-		 din:in std_logic_vector(11 downto 0);
-		 dout: out std_logic_vector(11 downto 0));
-END COMPONENT fifo_256;
+          clk: in std_logic;
+		      en:in std_logic;
+		      din:in std_logic_vector(11 downto 0);
+		      dout: out std_logic_vector(11 downto 0));
+END COMPONENT fifo_1024;
 
-COMPONENT data_out
-	PORT(rst_n : IN STD_LOGIC;
-		 clk : IN STD_LOGIC;
-		 sink_eop : IN STD_LOGIC;
-		 sink_valid : IN STD_LOGIC;
-		 din : IN STD_LOGIC_VECTOR(35 DOWNTO 0);
-		 data_valid : OUT STD_LOGIC;
-		 dout : OUT STD_LOGIC_VECTOR(35 DOWNTO 0)
-	);
-END COMPONENT;
+COMPONENT fifo_8
+ generic(N: integer );
+    port( rst_n: in std_logic;
+          clk: in std_logic;
+		      en:in std_logic;
+		      din:in std_logic_vector(11 downto 0);
+		      dout: out std_logic_vector(11 downto 0));
+END COMPONENT fifo_8;
 
-COMPONENT fifo_ip_8
-	PORT(wrreq : IN STD_LOGIC;
-		 rdreq : IN STD_LOGIC;
-		 clock : IN STD_LOGIC;
-		 aclr : IN STD_LOGIC;
-		 data : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-		 q : OUT STD_LOGIC_VECTOR(11 DOWNTO 0)
-	);
-END COMPONENT;
 
 COMPONENT de_map
-GENERIC (N : INTEGER
-			);
-	PORT(rst_n : IN STD_LOGIC;
-		 clk : IN STD_LOGIC;
-		 source_valid : IN STD_LOGIC;
-		 source_sop : IN STD_LOGIC;
-		 din_imag : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-		 din_imag_clc : IN STD_LOGIC_VECTOR(24 DOWNTO 0);
-		 din_real : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-		 din_real_clc : IN STD_LOGIC_VECTOR(24 DOWNTO 0);
-		 sink_sop : OUT STD_LOGIC;
-		 sink_eop : OUT STD_LOGIC;
-		 sink_valid : OUT STD_LOGIC;
-		 dout : OUT STD_LOGIC_VECTOR(35 DOWNTO 0);
-		 dout_imag : OUT STD_LOGIC_VECTOR(11 DOWNTO 0);
-		 dout_real : OUT STD_LOGIC_VECTOR(11 DOWNTO 0)
-	);
+GENERIC (N : INTEGER);
+	port( rst_n: in std_logic;
+         clk: in std_logic;
+         source_valid: in std_logic;
+			   din_real_clc: in std_logic_vector(24 downto 0);
+         sink_sop: out std_logic;
+         sink_eop: out std_logic;
+         sink_valid: out std_logic;
+         dout:out std_logic_vector(415 downto 0));
 END COMPONENT;
-
-SIGNAL	a_i :  STD_LOGIC_VECTOR(11 DOWNTO 0);
-SIGNAL	a_r_t :  STD_LOGIC_VECTOR(11 DOWNTO 0);
-SIGNAL	fft_data_valid_t :  STD_LOGIC;
-SIGNAL	fft_eop_t:  STD_LOGIC;
-SIGNAL	fft_sop_t:  STD_LOGIC;
+--
 SIGNAL	fft_source_imag_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL	fft_source_real_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL	fft_source_sop_t:  STD_LOGIC;
 SIGNAL	fft_source_valid_t:  STD_LOGIC;
-SIGNAL	pre_cnt_t :  STD_LOGIC;
+
 SIGNAL	rcv_data_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL	rcv_data_delay_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL	rst_n:  STD_LOGIC;
 SIGNAL	rt_i_t:  STD_LOGIC_VECTOR(24 DOWNTO 0);
 SIGNAL	rt_r_t :  STD_LOGIC_VECTOR(24 DOWNTO 0);
-SIGNAL	x_cor2_t :  STD_LOGIC_VECTOR(20 DOWNTO 0);
-signal   fft_source_imag_delay_1_t:std_logic_vector(11 downto 0);
 signal   fft_source_imag_delay_t:std_logic_vector(11 downto 0);
 signal   fft_source_imag_delay_n:std_logic_vector(11 downto 0);
-signal   fft_source_real_delay_1_t:std_logic_vector(11 downto 0);
+
 signal   fft_source_real_delay_t:std_logic_vector(11 downto 0);
 signal   demap_sink_v:std_logic;
-signal   demap_d:std_logic_vector(35 downto 0);
-signal   demap_sink_eop_t:std_logic;
+signal   demap_d:std_logic_vector(415 downto 0);
+
+
+signal dout1,dout2:std_logic_vector(31 downto 0);
+signal symbol_syn:std_logic_vector(19 downto 0);
+signal fft_data_valid_t,sink_sop_t,sink_eop_t:std_logic;
+signal payload_data_valid:std_logic;
 
 BEGIN 
 
 
-b2v_inst : x_cor
+b2v_inst : syn_cox
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
 		 din => rcv_data_t,
-		 dout1 => x_cor1,
-		 dout2 => x_cor2_t);
-
-
-b2v_inst1 : div
-PORT MAP(rst_n => rst_n,
+		 dout1 => dout1,
+		 dout2 => dout2,
+		 dout =>rcv_data_delay_t);
+		 
+		 
+b2v_fft_ctr: fft_ctr
+  port map(	rst_n => rst_n,
 		 clk => clk,
-		 din2 => x_cor2_t,
-		 pre_cnt_o => pre_cnt_t,
-		 cnt_o => cnt_o,
-		 max_p => max_p,
-		 max_value => max_value,
-		 p_cnt_o => p_cnt_o,
-		 syn_point => syn_point);
-
-x_cor2<=x_cor2_t;
-
-
-b2v_inst2 : sop_eop_gen
-PORT MAP(rst_n => rst_n,
-		 clk => clk,
-		 pre_cnt => pre_cnt_t,
-		 sop => fft_sop_t,
-		 eop => fft_eop_t,
-		 data_valid => fft_data_valid_t,
-		 rcv_data_valid =>rcv_data_valid
-		 );
-pre_cnt<=pre_cnt_t;
-fft_sop<=fft_sop_t;
-fft_eop<=fft_eop_t;
-fft_data_valid<=fft_data_valid_t;
+		 dout1 => dout1,
+		 dout2 => dout2,
+		 cnt_o=>cnt_o,
+		 fft_data_valid =>fft_data_valid_t,
+		 sink_sop => sink_sop_t,
+     sink_eop =>sink_eop_t,
+     payload_data_valid =>payload_data_valid);
 
 
 
 b2v_inst28 : mult_complex_ip
-PORT MAP(dataa_imag => a_i,
-		 dataa_real => a_r_t,
-		 datab_imag => fft_source_imag_delay_n,
-		 --datab_real => fft_source_real_delay_t,
-		 datab_real => fft_source_real_delay_1_t,
-		 result_imag => rt_i_t,
-		 result_real => rt_r_t);
+PORT MAP(dataa_imag =>fft_source_imag_t ,
+		     dataa_real =>fft_source_real_t,
+		     datab_imag => fft_source_imag_delay_n,
+		     datab_real => fft_source_real_delay_t,
+		     result_imag => rt_i_t,
+		     result_real => rt_r_t);
 
 rt_i<=rt_i_t;
 rt_r<=rt_r_t;
 
 b2v_inst29 : add_ip
-PORT MAP(--datab => fft_source_imag_delay_t,
-         
-         datab => fft_source_imag_delay_1_t,
+PORT MAP(datab => fft_source_imag_delay_t,
          result =>fft_source_imag_delay_n);
 
 
@@ -278,9 +216,10 @@ PORT MAP(clk => clk,
 		 clk_ena => '1',
 		 inverse => '0',
 		 sink_valid => fft_data_valid_t,
-		 sink_sop => fft_sop_t,
-		 sink_eop => fft_eop_t,
-		 source_ready => fft_source_valid_t,
+		 sink_sop => sink_sop_t,
+		 sink_eop => sink_eop_t,
+		 --source_ready => fft_source_valid_t,
+		 source_ready =>'1',
 		 sink_error =>"00",
 		 sink_imag => (others=>'0'),
 		 sink_real => rcv_data_delay_t,
@@ -288,90 +227,50 @@ PORT MAP(clk => clk,
 		 source_sop => fft_source_sop_t,
 		 source_eop => fft_source_eop,
 		 source_valid => fft_source_valid_t,
-		 source_error => fft_source_eeror,
+		 source_error => fft_source_error,
 		 source_exp => fft_source_exp,
 		 source_imag => fft_source_imag_t,
 		 source_real => fft_source_real_t);
 
-     rcv_data_delay<=rcv_data_delay_t;
+     fft_sop<=sink_sop_t;
+     fft_eop<=sink_eop_t;
+     fft_data_valid<=fft_data_valid_t; 
+     
      fft_source_valid<=fft_source_valid_t;
 	  fft_source_sop<=fft_source_sop_t;
 	  fft_source_imag<=fft_source_imag_t;
 	  fft_source_real<=fft_source_real_t;
-	  fft_source_imag_delay_1<=fft_source_imag_delay_1_t;
-	  fft_source_real_delay_1<=fft_source_real_delay_1_t;
 	  fft_source_real_delay<=fft_source_real_delay_t;
 	  fft_source_imag_delay<=fft_source_imag_delay_t;
 	  
 	  
-b2v_inst32 : fifo_256
-   generic MAP (N=>256) 
-    port MAP (rst_n => rst_n,
-              clk =>clk,
-			     en =>'1',
-		        din => rcv_data_t,
-              dout =>rcv_data_delay_t);
-
-b2v_inst33 : fifo_256
-  generic MAP (N=>256) 
+b2v_inst33 : fifo_1024
+  generic MAP (N=>1024) 
     port MAP (rst_n =>rst_n,
               clk =>clk,
-			     en => fft_source_valid_t,
-		        din => fft_source_real_t,
-              dout =>fft_source_real_delay_1_t);
+			        en => fft_source_valid_t,
+		          din => fft_source_real_t,
+              dout =>fft_source_real_delay_t);
 
 
-b2v_inst34 : fifo_256
-  generic MAP (N=>256) 
+b2v_inst34 : fifo_1024
+  generic MAP (N=>1024) 
      port MAP (rst_n =>rst_n,
                clk =>clk,
-			      en => fft_source_valid_t,
-		         din => fft_source_imag_t,
-               dout =>fft_source_imag_delay_1_t);
-
-b2v_inst35 : fifo_256
- generic MAP (N=>256) 
-   port MAP (rst_n =>rst_n,
-             clk =>clk,
-			    en => fft_source_valid_t,
-		       din => fft_source_real_delay_1_t,
-             dout =>fft_source_real_delay_t);
-			
-
-
-b2v_inst36 : fifo_256
-  generic MAP (N=>256) 
-    port MAP (rst_n =>rst_n,
-              clk =>clk,
-			     en => fft_source_valid_t,
-		        din => fft_source_imag_delay_1_t,
-              dout =>fft_source_imag_delay_t);
-
-		 
+			         en => fft_source_valid_t,
+		           din => fft_source_imag_t,
+               dout =>fft_source_imag_delay_t);
 		 
 
 rst_n <= NOT(rst or not(rcv_en));
 
 
-
-b2v_inst5 : data_out
-PORT MAP(rst_n => rst_n,
-		   clk => clk,
-		   sink_eop => demap_sink_eop_t,
-		   sink_valid => demap_sink_v,
-		   din => demap_d,
-		   data_valid => demap_sink_valid,
-		   dout => demap_dout);
-
-demap_sink_eop<=demap_sink_eop_t;
-
-
-b2v_inst8 : fifo_256
+b2v_inst8 : fifo_8
   generic MAP (N=>8) 
   port MAP (rst_n =>rst_n,
             clk =>clk,
-			  en => rcv_en,
-		     din => data_in,
+			      en => rcv_en,
+		        din => data_in,
             dout =>rcv_data_t);
  
  
@@ -381,25 +280,17 @@ b2v_inst8 : fifo_256
 
 
 b2v_inst_17 : de_map
-GENERIC MAP(N => 33
-			)
+GENERIC MAP(N => 80 )
 PORT MAP(rst_n => rst_n,
-		 clk => clk,
-		 source_valid => fft_source_valid_t,
-		 source_sop => fft_source_sop_t,
-		 --din_imag => fft_source_imag_delay_1_t,
-		 din_imag => fft_source_imag_t,
-		 din_imag_clc => rt_i_t,
-		 --din_real => fft_source_real_delay_1_t,
-		 din_real => fft_source_real_t,
-		 din_real_clc => rt_r_t,
-		 sink_sop => demap_sink_sop,
-		 sink_eop => demap_sink_eop_t,
-		 sink_valid => demap_sink_v,
-		 dout => demap_d,
-		 dout_imag => a_i,
-		 dout_real => a_r_t);
-		 
-  a_r<=a_r_t;
-
+		     clk => clk,
+		     source_valid => payload_data_valid,
+		     din_real_clc => rt_r_t,
+		     sink_sop => demap_sink_sop,
+		     sink_eop => demap_sink_eop,
+		     sink_valid => demap_sink_v,
+		     dout => demap_d);
+		     
+   demap_sink_valid<=demap_sink_v;
+   demap_dout<=demap_d;
+   
 END bdf_type;

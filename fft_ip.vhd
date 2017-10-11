@@ -112,7 +112,7 @@ BEGIN
 
 	asj_fft_sglstream_fft_121_inst : asj_fft_sglstream_fft_121
 	GENERIC MAP (
-		nps => 256,
+		nps => 1024,
 		bfp => 1,
 		nume => 1,
 		mpr => 12,
@@ -125,13 +125,13 @@ BEGIN
 		mult_type => 1,
 		mult_imp => 0,
 		dsp_arch => 0,
-		srr => "AUTO_SHIFT_REGISTER_RECOGNITION=ON",
-		rfs1 => "fft_ip_1n256sin.hex",
-		rfs2 => "fft_ip_2n256sin.hex",
-		rfs3 => "fft_ip_3n256sin.hex",
-		rfc1 => "fft_ip_1n256cos.hex",
-		rfc2 => "fft_ip_2n256cos.hex",
-		rfc3 => "fft_ip_3n256cos.hex"
+		srr => "AUTO_SHIFT_REGISTER_RECOGNITION=OFF",
+		rfs1 => "fft_ip_1n1024sin.hex",
+		rfs2 => "fft_ip_2n1024sin.hex",
+		rfs3 => "fft_ip_3n1024sin.hex",
+		rfc1 => "fft_ip_1n1024cos.hex",
+		rfc2 => "fft_ip_2n1024cos.hex",
+		rfc3 => "fft_ip_3n1024cos.hex"
 	)
 	PORT MAP (
 		clk  =>  clk,
@@ -175,7 +175,7 @@ END SYN;
 -- Retrieval info:      <PRIVATE name = "use_mem" value="1"  type="BOOLEAN"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "mem_type" value="M512"  type="STRING"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "DEVICE" value="Cyclone IV E"  type="STRING"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NPS" value="256"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NPS" value="1024"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "MPR" value="12"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "TWR" value="12"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "OPR" value="29"  type="INTEGER"  enable="1" />
@@ -187,14 +187,14 @@ END SYN;
 -- Retrieval info:      <PRIVATE name = "MULT_IMP" value="0"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "MEGA" value="0"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "M512" value="1"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "LOGIC_IN_RAM" value="1"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NUM_LE" value="2681"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NUM_M4K" value="13"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "LOGIC_IN_RAM" value="0"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NUM_LE" value="3723"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NUM_M4K" value="19"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "NUM_MEGA" value="0"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "NUM_M512" value="0"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "NUM_DSP" value="24"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NUM_CALC_CYCLES" value="256"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NUM_BLK_THROUGHPUT_CYCLES" value="256"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NUM_CALC_CYCLES" value="1024"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NUM_BLK_THROUGHPUT_CYCLES" value="1024"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "rfs1" value="romfile_1024.hex"  type="STRING"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "rfs2" value="romfile_1024.hex"  type="STRING"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "rfs3" value="romfile_1024.hex"  type="STRING"  enable="1" />
@@ -202,7 +202,7 @@ END SYN;
 -- Retrieval info:      <PRIVATE name = "rfc2" value="romfile_1024.hex"  type="STRING"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "rfc3" value="romfile_1024.hex"  type="STRING"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "ENA" value="1"  type="INTEGER"  enable="1" />
--- Retrieval info:      <PRIVATE name = "NUM_MEMBITS" value="106496"  type="INTEGER"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "NUM_MEMBITS" value="155648"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "INPUT_ORDER" value="1"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "OUTPUT_ORDER" value="0"  type="INTEGER"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "REPRESENTATION" value="0"  type="INTEGER"  enable="1" />
@@ -212,8 +212,8 @@ END SYN;
 -- Retrieval info:     </NAMESPACE>
 -- Retrieval info:     <NAMESPACE name = "simgen_enable">
 -- Retrieval info:      <PRIVATE name = "language" value="VHDL"  type="STRING"  enable="1" />
--- Retrieval info:      <PRIVATE name = "gb_enabled" value="1"  type="BOOLEAN"  enable="1" />
 -- Retrieval info:      <PRIVATE name = "enabled" value="1"  type="BOOLEAN"  enable="1" />
+-- Retrieval info:      <PRIVATE name = "gb_enabled" value="1"  type="BOOLEAN"  enable="1" />
 -- Retrieval info:     </NAMESPACE>
 -- Retrieval info:     <NAMESPACE name = "simgen">
 -- Retrieval info:      <PRIVATE name = "filename" value="fft_ip.vho"  type="STRING"  enable="1" />
