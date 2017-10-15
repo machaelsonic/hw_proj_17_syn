@@ -25,7 +25,8 @@ component tranceiver is
 		   rx_en:out std_logic;
 		   --flag_o:out std_logic;
 		   cpu_rx_data_valid:out std_logic;
-		   cpu_rx_data:out std_logic_vector(31 downto 0));
+		   cpu_rx_data:out std_logic_vector(31 downto 0);
+		   dma_wr_en:out std_logic);
 END component tranceiver;
 
 --FILE tb_tx_data_tranceiver:TEXT OPEN WRITE_MODE IS "tb_tx_data_tranceiver.txt";

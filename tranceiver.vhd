@@ -119,7 +119,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
           end if;
 			
 			when s_delay2tx =>
-          if  delay_cnt=127 then  
+          if  delay_cnt=1 then  
              next_state<=s_tx;
           else
              next_state<=s_delay2tx;
