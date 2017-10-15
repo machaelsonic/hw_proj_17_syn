@@ -80,7 +80,7 @@ architecture rtl of spi_ctr is
             start<='1';
             cnt_en<='1';
             if cnt<18 then
-					  dout<="0000100101010101";--R09--010101 -- rx gain
+					  dout<="0000100101001111";--R09--010101 -- rx gain --001111
 					  
             elsif cnt<37 then
 					dout<="0000011100000000";--R07
@@ -90,13 +90,16 @@ architecture rtl of spi_ctr is
 					dout<="0000010100000000";--R05
 			   elsif cnt<94 then
 					dout<="0000010000110010";--R04,(B1=1,B0=0)->M=2(F=4);
+					
+					--dout<="0000010000110000";--R04,(B1=0,B0=0)->M=0 ;
 				elsif cnt<113 then
                dout<="0000011001001000";--R06
 					
 					--dout<="0000011000010001";--R06 clkout1 and clkout2 is disabled
             elsif cnt<132 then
-               dout<="0000110000000001";--R0C--  (B7,B6)10<->F=1,00<->F=4,01<->F=2
-
+                 dout<="0000110000000001";--R0C--  (B7,B6)10<->F=1,00<->F=4,01<->F=2
+					  
+                 --dout<="0000110010000001";--R0C--  
             elsif cnt<151 then
                dout<="0000111000000001"; --R0E
             else

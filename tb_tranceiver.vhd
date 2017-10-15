@@ -30,7 +30,7 @@ END component tranceiver;
 
 --FILE tb_tx_data_tranceiver:TEXT OPEN WRITE_MODE IS "tb_tx_data_tranceiver.txt";
 FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_tranceiver.txt";
---FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "rcv_data4.txt";
+--FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "rcv_data3.txt";
 signal cnt_1:integer range 0 to 49999;
 signal tmp,cpu_tx_data,cpu_rx_data :std_logic_vector(31 downto 0);
 signal d_t:std_logic;
@@ -89,10 +89,19 @@ END PROCESS ;
 		end process;
 
 cpu_tx_data_valid<=d_t;
---cpu_tx_data_valid<='0';
+ --cpu_tx_data_valid<='0';
 --dout<="101001011010010110100101101001011010";
 cpu_tx_data<=tmp; 
-
+--process
+--  begin   
+--     cpu_tx_data_valid<='0';
+--     wait for 1000 ns;
+--     cpu_tx_data_valid<='1';
+--     wait for 40 ns;
+--     cpu_tx_data_valid<='0';
+--     wait;
+--  end process;
+   
 u1: tranceiver PORT map 
 	  (
 		   clk =>clk,
@@ -133,14 +142,14 @@ process(rst_n,clk) is
         rx_data_from_file<=(others=>'0');
       elsif rising_edge(clk) then
          --if rx_en='1' and flag_o='1' then
-         if rx_en='1'  then
+         --if rx_en='1'  then
            if not(endfile(tb_rx_data_tranceiver)) then
 			        READLINE (tb_rx_data_tranceiver,lo_1);
 			        READ (lo_1,rx_data_from_file_int);
 			        rx_data_from_file_int_signal<=rx_data_from_file_int;	
 		          rx_data_from_file<=std_logic_vector(to_signed(rx_data_from_file_int,12));	
 		       end if;
-		     end if;
+		     --end if;
 		   end if;
 	end process;	
 	

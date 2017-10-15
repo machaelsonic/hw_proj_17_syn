@@ -6,9 +6,9 @@ entity data_out is
          clk: in std_logic;
          sink_eop: in std_logic;
          sink_valid: in std_logic;
-			din:in std_logic_vector(35 downto 0);
+			   din:in std_logic_vector(35 downto 0);
          dout:out std_logic_vector(35 downto 0);
-			data_valid:out std_logic);
+			   data_valid:out std_logic);
 end entity data_out;
 
 architecture rtl of data_out is

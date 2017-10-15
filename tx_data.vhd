@@ -27,9 +27,8 @@ signal valid_t,valid1_t,valid_t1:std_logic;
             do<=(others=>'0');
          else
             if state_cnt>=3 and state_cnt<=10242 then
-
-					     do<=d1(7 downto 0)&"0000";
-					     --do<=d1; 
+                 do<=d1;
+					  --do<=d1(11)&d1(11 downto 1); 
             elsif state_cnt>=10243 and state_cnt<=19134 then
                --do<=d2(11 downto 0);
                do<=d2(9 downto 0)&"00";

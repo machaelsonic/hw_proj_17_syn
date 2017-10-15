@@ -11,7 +11,8 @@ entity fft_ctr is
        fft_data_valid:out std_logic;
        sink_sop:out std_logic;
        sink_eop:out std_logic;
-       payload_data_valid:out std_logic);
+       payload_data_valid:out std_logic;
+		 dma_wr_en:out std_logic);
 end entity fft_ctr;
 
 architecture rtl of fft_ctr is
@@ -33,8 +34,8 @@ architecture rtl of fft_ctr is
 	
  begin
    
-	reg2(31 downto 27)<=(others=>dout1(31));
-	reg2(26 downto 0)<=dout1(31 downto 5);
+	reg2(31 downto 28)<=(others=>dout1(31));
+	reg2(27 downto 0)<=dout1(31 downto 4);
 	
    cnt_o<=cnt; 
    process(rst_n,clk) is
@@ -57,7 +58,8 @@ end process;
              end if;
 				 
 			 when s_idle =>
-		        if  signed(reg2)>signed(reg1) then
+		        --if  signed(reg2)>signed(reg1) and (signed(reg1)/=0) then
+				  if  signed(reg2)>signed(reg1) then
 					  next_state<=s_idle1;
 					  --reg3<=reg1;
               else
@@ -131,6 +133,7 @@ end process;
 			s_fft_cnt<=0;
 			reg3<=(others=>'0');
 			reg1<=(others=>'0');
+			dma_wr_en<='0';
       elsif clk'event and clk='1' then
         case state is
           when s_idle => 
@@ -186,8 +189,14 @@ end process;
 			        s_idle3_timeout_cnt<=0;
 					    if s_rcv_timeout_cnt=15000 then
 				          s_rcv_timeout_cnt<=0;
+							 dma_wr_en<='0';
 				       else
                       s_rcv_timeout_cnt<=s_rcv_timeout_cnt+1;
+							 if s_rcv_timeout_cnt>=2048 and s_rcv_timeout_cnt<=3071 then
+							    dma_wr_en<='1';
+							 else
+							    dma_wr_en<='0';
+							 end if; 
 						 end if;
 						 
 					  --if  (signed(dout2)<signed(dout1(30 downto 0)&'0'))  then

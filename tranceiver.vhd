@@ -18,7 +18,8 @@ entity tranceiver is
 		   rx_en:out std_logic;
 		   --flag_o:out std_logic;
 		   cpu_rx_data_valid:out std_logic;
-		   cpu_rx_data:out std_logic_vector(31 downto 0));--415
+		   cpu_rx_data:out std_logic_vector(31 downto 0);--415
+			dma_wr_en:out std_logic);
 end entity tranceiver;
 
 architecture rtl of tranceiver is
@@ -53,7 +54,8 @@ component rx IS
 		demap_sink_valid :  OUT  STD_LOGIC;
 		pre_cnt :  OUT  STD_LOGIC;
 		rcv_data_valid :  OUT  STD_LOGIC;
-		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0)
+		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		dma_wr_en:out std_logic
 	);
 END component rx;
 
@@ -108,7 +110,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
               else
                  next_state<=s_rx;
               end if;
-				 
+	 
         when s_rx =>
 			 if  cpu_tx_data_valid='1'   then
                 next_state<=s_delay2tx;	 
@@ -144,7 +146,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
          when s_rst=> 
 			      rx_en_t<='0';
 					tx_en_t<='0'; 
-					delay_cnt_en<='0';
+					delay_cnt_en<='0';	
          when s_rx => 
 			      rx_en_t<='1';
 					tx_en_t<='0'; 
@@ -152,7 +154,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
 			when s_delay2tx => 
 			      rx_en_t<='0';
 					tx_en_t<='0'; 
-			      delay_cnt_en<='1';		
+			      delay_cnt_en<='1';	
          when s_tx => 
 			      rx_en_t<='0';
 					tx_en_t<='1';
@@ -160,7 +162,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
 			when s_delay2rx => 
 			      rx_en_t<='0';
 					tx_en_t<='0';  
-			      delay_cnt_en<='1';		
+			      delay_cnt_en<='1';	
     end case;
 end process;
 
@@ -230,7 +232,8 @@ rx_inst: rx
 		--rx_data =>plc_channal_data,
 		rx_cnt => rx_cnt,
 		rcv_data_valid=> cpu_rx_data_valid,
-		demap_dout => cpu_rx_data_t
+		demap_dout => cpu_rx_data_t,
+		dma_wr_en=> dma_wr_en
 	);	
  
 	

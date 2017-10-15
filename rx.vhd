@@ -34,7 +34,8 @@ ENTITY rx IS
 		demap_sink_valid :  OUT  STD_LOGIC;
 		pre_cnt :  OUT  STD_LOGIC;
 		rcv_data_valid :  OUT  STD_LOGIC;
-		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0)
+		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		dma_wr_en:out std_logic
 	);
 END rx;
 
@@ -68,7 +69,8 @@ COMPONENT receiver
 		rcv_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		rt_i :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
-		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0)
+		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
+		dma_wr_en:out std_logic
 	);
 END COMPONENT;
 
@@ -87,7 +89,8 @@ PORT MAP(rst => rst_rx_syn,
 		 demap_sink_sop => demap_sink_sop,
 		 demap_sink_eop => demap_sink_eop,
 		 demap_sink_valid => demap_sink_valid_t,
-		 demap_dout => demap_dout);
+		 demap_dout => demap_dout,
+		 dma_wr_en=> dma_wr_en);
 
 rcv_data_valid<=demap_sink_valid_t;
 END bdf_type;

@@ -1,7 +1,9 @@
 clear
 clc
 SNR=9;% 信噪比 
-noise_ctr=0;  % noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
+
+channel_sel=0;%channel_sel=0代表理想信道，channel_sel=1代表电力线信道
+noise_ctr=1;  % channel_sel=1时有效，noise_ctr=0代表无噪声,noise_ctr=1,代表有噪声;
 payload_num=6; %payload的symbol个数
 
 first_carrier_id=81;%起始子载波编号
@@ -12,9 +14,11 @@ fft_point=1024;% FFT点数
 cp_num=458;%循环前缀的点数
 
 frame_length=fft_point*10+payload_num*(fft_point+cp_num); %帧长度=19132;
+
 ofdm_window_offset=50;%定义ofdm窗口的提前量
+
 phase_data=load('E:\design\QUARTUS\plc_design_final.git\matlab_sim\行为模型\phase_rev.txt'); %从文件中读取前导序列相位
-%phase_data=phase_data-1;
+
  %根据使用的子载波情况生成m符号相位
 for k1=first_carrier_id:last_carrier_id
     if phase_data(1,k1)>=8 
@@ -24,7 +28,7 @@ for k1=first_carrier_id:last_carrier_id
     end
 end
 
-frame_num=5;%发送帧个数
+frame_num=1;%发送帧个数
 err_cnt=zeros(1,frame_num);%帧误码计数
 err_total=0; %总误码计数
 tx_data_matlab=[];
@@ -37,13 +41,14 @@ for frame_id=1:frame_num
     send_data_ifft_r_rtl=[];
     for k1=1:payload_num
         %[load_data,valid_data]=data_gen;
-        %data=rand(1,36);%产生随机数据
+         %data=rand(1,carrier_num);%产生随机数据
          data= double(dec2bin(frame_id,carrier_num))-double('0');%产生递增数据：1，2，3，4，5......
  
         [load_data,valid_data,valid_data_map,pre_phase_next]=data_gen(pre_phase,data,carrier_num,fft_point,first_carrier_id,last_carrier_id);
         
         %%%%%%%%%%%理论FFT模型%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        data_gen_ifft_r=round(real(ifft(load_data,fft_point)));
+        %data_gen_ifft_r=round(real(ifft(load_data,fft_point)));%取整
+        data_gen_ifft_r= real(ifft(load_data,fft_point));% 原始数据，未取整
         cp=data_gen_ifft_r(fft_point-cp_num+1:fft_point);
         send_data_ifft_r=[send_data_ifft_r cp data_gen_ifft_r];%6个payload数据，每个payload数据包含一个cp，
         %一个cp为458个采样点，共6*1482=8892个采样点
@@ -64,8 +69,8 @@ for frame_id=1:frame_num
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [pre_data,p]=preamble(phase_data,fft_point,first_carrier_id,last_carrier_id);%生成前导序列，包含8个p符号和2个m符号，10240个采样点
-    tx_data=[pre_data*16 send_data_ifft_r_rtl*4]; %发送到电力线上的数据， 共19132个采样点,对前导序列放大16倍,实际设计过程中可根据具体数值进行调整
-    
+    % tx_data=[pre_data*16 send_data_ifft_r_rtl*4]; %发送到电力线上的数据， 共19132个采样点,对前导序列放大16倍,实际设计过程中可根据具体数值进行调整
+     tx_data=[pre_data*16 send_data_ifft_r*16];%理论发送数据，采用fft函数实现
     for k=1:frame_length
         if tx_data(k)>1023
             tx_data(k)=1023;
@@ -79,9 +84,13 @@ for frame_id=1:frame_num
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%电力线信道%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     %   rcv_data=tx_data;%理想信道
-    %   [rcv_data,NOISE] = noisegen(tx_data,SNR);
+    
+    %   [rcv_data,NOISE] = noisegen(tx_data,SNR); 
+    if channel_sel==0 
+       rcv_data=tx_data;%理想信道
+    else
       [rcv_data,ht,trms,t_max]=PLC_channel(tx_data,1,noise_ctr,SNR);
+    end
     rcv_data_ex=[rcv_data zeros(1,600)]; %扩展接收数据,防止定位点后移导致数据数组索引超范围
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%接收机代码%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +102,9 @@ for frame_id=1:frame_num
     
     syn_point_vec(frame_id)=syn_point;% 同步点滑动范围
     start_point_vec(frame_id)=start_point;%起始点滑动范围
-    [valid_data_rcv,rt_r,rt_j]=data_rcv(fft_data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num);
+    [valid_data_rcv,rt_r_vec,rt_j_vec]=data_rcv(fft_data,h,payload_num,m_rcv_fft,fft_point,first_carrier_id,last_carrier_id,cp_num);
+    
+    
     %%%%%%%%%%%%误码率统计%%%%%%%%%%%%%%%%%%%%%
     for k=1:carrier_num*payload_num
         if valid_data_rcv(k)~=valid_data_tx(k)
@@ -109,6 +120,9 @@ end
 %   tx_data_o =tx_data_o';
 %   tx_data_compare=tx_data_matlab-tx_data_o;
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%%%%%%%%%%%%%%比较matlab模型与modelsim模型的复数乘法后的数据
+ 
+ 
     figure(1);
     subplot(4,1,1)
     plot(tx_data);
@@ -133,9 +147,9 @@ end
     figure(6)
     plot(err_rate);
     figure(7)
-    plot(rt_r,'r');
+    plot(rt_r_vec,'r');
     hold on
-    plot(rt_j);
+    plot(rt_j_vec);
   
 
 

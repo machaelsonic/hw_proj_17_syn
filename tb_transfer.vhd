@@ -15,7 +15,7 @@ architecture rtl of tb_transfer is
 		rst_n :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		din :  IN  STD_LOGIC_VECTOR(35 DOWNTO 0);
+		--din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -33,9 +33,7 @@ architecture rtl of tb_transfer is
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
-		flag_o1 :  OUT  STD_LOGIC;
-		flag_eop :  OUT  STD_LOGIC;
-		cnt :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
+		cnt :  OUT  STD_LOGIC_VECTOR(14 DOWNTO 0);
 		ifft_data :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ifft_dout_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_dout_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -43,14 +41,15 @@ architecture rtl of tb_transfer is
 		ifft_source_exp :  OUT  STD_LOGIC_VECTOR(5 DOWNTO 0);
 		ifft_source_imag :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		ifft_source_valid: out std_logic;
 		pre_win_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ram1_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram2_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		ram_rd_data :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ram_wr_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
-		rd_cnt_o :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(7 DOWNTO 0);
+		ram_wr_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
+		rd_cnt_o :  OUT  STD_LOGIC_VECTOR(10 DOWNTO 0);
+		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0)
 	);
 END component transfer;
@@ -59,8 +58,8 @@ FILE tb_tx_data_o:TEXT OPEN WRITE_MODE IS "tb_tx_data_o.txt";
 FILE tb_pre_win_data:TEXT OPEN WRITE_MODE IS "tb_pre_win_data.txt";
 FILE tb_ifft_source_real:TEXT OPEN WRITE_MODE IS "tb_ifft_source_real.txt";
 
-signal cnt_1:integer range 0 to 4999;
-signal tmp,din :std_logic_vector(35 downto 0);
+signal cnt_1:integer range 0 to 25999;
+signal tmp,din :std_logic_vector(415 downto 0);
 signal d_t:std_logic;
 signal rst_n,clk,en:std_logic;
 signal tx_data_valid:std_logic;
@@ -68,7 +67,7 @@ signal tx_data_o : STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal ifft_source_real :STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal pre_win_data_valid :STD_LOGIC;
 signal pre_win_data :STD_LOGIC_VECTOR(11 DOWNTO 0);
-
+signal ifft_source_valid:std_logic;
 begin
 
 
@@ -99,11 +98,11 @@ END PROCESS ;
  process(rst_n,clk) is
 		  begin
 		    if rst_n='0' then
-			    cnt_1<=2100;
+			    cnt_1<=25900;
 				 d_t<='0';
 				 tmp<=(others=>'0');
 			 elsif clk'event and clk='1' then
-			    if cnt_1=4999 then
+			    if cnt_1=25999 then
 				    cnt_1<=0;
 					 d_t<='1';
 					 tmp<=tmp+1;
@@ -125,12 +124,13 @@ u1: transfer PORT map
 		rst_n =>rst_n,
 		clk =>clk,
 		en =>en,
-		din =>din,
+		--din =>din,
 		tx_data_valid=>tx_data_valid,
 		tx_data_o=>tx_data_o,
 		ifft_source_real => ifft_source_real,
 		pre_win_data => pre_win_data,
-		pre_win_data_valid => pre_win_data_valid);
+		pre_win_data_valid => pre_win_data_valid,
+		ifft_source_valid=>ifft_source_valid);
 		-- ram_rd_en,
 		-- ram_wr_en,
 		-- tx_data_valid,
@@ -173,17 +173,17 @@ process(clk) is
  	VARIABLE lo_1:LINE;
     BEGIN
 	     if rising_edge(clk) then
-				if tx_data_valid='1' then
+				--if tx_data_valid='1' then
 					WRITE (lo_1,to_integer(signed(tx_data_o)),left,10);
 					WRITELINE (tb_tx_data_o,lo_1);
-				end if;
+				--end if;
 		 end if;
 end process;	
 	
 process(clk) is
 	VARIABLE lo_1:LINE;
 	--alias ifft_source_valid is <<signal i1.b2v_inst1.ifft_source_ready_t  : STD_LOGIC>>;
-  alias ifft_source_valid is <<signal u1.b2v_inst1.source_valid  : STD_LOGIC>>;
+  --alias ifft_source_valid is <<signal u1.b2v_inst1.source_valid  : STD_LOGIC>>;
 
    BEGIN
 	     if rising_edge(clk) then

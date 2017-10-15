@@ -9,7 +9,8 @@ end
 ifft_x=ifft(x,fft_point);
 p=real(ifft_x);
 
-p=round(p*1023);%p符号量化为12位二进制数据,保留2位符号,10位有效数据
+  %p=round(p*1023);%p符号量化为12位二进制数据,保留2位符号,10位有效数据
+  p=p*1023;
 m=0-p;
 
 output=[p p p p p p p p m m];

@@ -1,7 +1,7 @@
 function [data_delay,frame_syn,frame_syn_rtl,frame_syn_1,syn_point,start_point,fft_window,fft_point_cnt,fft_data,h,m_rcv_fft,m_rcv]=syn_cox(data,p,fft_point,payload_num,ofdm_window_offset)
 [N,M]=size(data);
-data=[data zeros(1,1024)];
-data_delay=[zeros(1,1024) data];%延时1024个采样点，在FPGA实现时，可采用s_a的移位输出实现1024点延时
+data=[data zeros(1,fft_point)];
+data_delay=[zeros(1,fft_point) data];%延时1024个采样点，在FPGA实现时，可采用s_a的移位输出实现1024点延时
 %%%%%%%%%%%FPGA实现接收数据的1024点延时%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % for k1=1:M+fft_point-1
 %    for k=2*fft_point:-1:1
@@ -199,8 +199,8 @@ frame_cnt+start_point;
   
  m_tx=0-p;
  
-  %m_rcv_fft=fft(m_rcv,256);
-  [m_rcv_fft,exp1]=fft_ip_model(m_rcv,fft_point,0) ;
+    m_rcv_fft=fft(m_rcv,fft_point);
+  %  [m_rcv_fft,exp1]=fft_ip_model(m_rcv,fft_point,0) ;
   m_tx_fft=fft(m_tx,fft_point);
   
   h=m_rcv_fft./m_tx_fft;
