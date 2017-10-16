@@ -178,6 +178,8 @@ process(rst,clk) is
 				 else
 				    delay_cnt<=delay_cnt+1;
 				 end if;
+			else
+			   delay_cnt<=0; 
 			end if;
 	 end if;
 end process;
@@ -210,8 +212,6 @@ tx_inst: tx
 		tx_data_o =>tx_data_o
 	);
 	
-	
---rcv_en<= not tx_data_valid_t;
 rcv_en<=rx_en_t; 
 tx_data_valid<= tx_data_valid_t;
 
@@ -227,9 +227,9 @@ rx_inst: rx
 		clk_20M => clk,
 		rst_rx_syn => rst,
 		rcv_en => rcv_en, 
-		rx_data => rx_data,
+		--rx_data => rx_data,
 		--rx_data => "001111111111",
-		--rx_data =>plc_channal_data,
+		rx_data =>plc_channal_data,
 		rx_cnt => rx_cnt,
 		rcv_data_valid=> cpu_rx_data_valid,
 		demap_dout => cpu_rx_data_t,
