@@ -70,13 +70,13 @@ component data_direction is
 		   tx_rx_data:inout std_logic_vector(11 downto 0));
 end component data_direction;
 
-signal tx_data_valid_t:std_logic;
-signal tx_data_o,rx_data:std_logic_vector(11 downto 0);
+signal tx_data_valid_t,tx_triger_t:std_logic;
+signal tx_data_o,rx_data,rx_datain:std_logic_vector(11 downto 0);
 signal rcv_en:std_logic;
 signal tx_cnt:STD_LOGIC_VECTOR(14 DOWNTO 0);
 signal rx_cnt:integer range 0 to 13999;
 signal tx_en_t,rx_en_t:std_logic;
-signal cpu_tx_data_t,cpu_rx_data_t:std_logic_vector(415 downto 0);
+signal cpu_tx_data_t,cpu_rx_data_t,tx_datain:std_logic_vector(415 downto 0);
 type state_t is (s_rst,s_rx,s_tx,s_delay2tx,s_delay2rx);
 signal state,next_state:state_t;
 --signal flag,slave_tx_data_valid:std_logic;
@@ -120,7 +120,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
           end if;
 			
 			when s_delay2tx =>
-          if  delay_cnt=1 then  
+          if  delay_cnt=127 then  
              next_state<=s_tx;
           else
              next_state<=s_delay2tx;
@@ -147,23 +147,38 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
          when s_rst=> 
 			      rx_en_t<='0';
 					tx_en_t<='0'; 
-					delay_cnt_en<='0';	
+					delay_cnt_en<='0';
+				   tx_triger_t<='0';
+					tx_datain<=(others=>'Z');
+				   rx_datain<=(others=>'Z');	
          when s_rx => 
 			      rx_en_t<='1';
 					tx_en_t<='0'; 
 					delay_cnt_en<='0';
+					tx_triger_t<='0';
+					tx_datain<=(others=>'Z');
+					rx_datain<=rx_data;
 			when s_delay2tx => 
 			      rx_en_t<='0';
 					tx_en_t<='0'; 
-			      delay_cnt_en<='1';	
+			      delay_cnt_en<='1';
+				   tx_triger_t<='0';
+					tx_datain<=(others=>'Z');
+				   rx_datain <=(others=>'Z');	
          when s_tx => 
 			      rx_en_t<='0';
 					tx_en_t<='1';
 					delay_cnt_en<='0';
+					tx_triger_t<=cpu_tx_data_valid;
+					tx_datain<=cpu_tx_data_t;
+					rx_datain <=(others=>'Z');
 			when s_delay2rx => 
 			      rx_en_t<='0';
 					tx_en_t<='0';  
-			      delay_cnt_en<='1';	
+			      delay_cnt_en<='1';
+				   tx_triger_t<='0';
+					tx_datain<=(others=>'Z');
+				   rx_datain<=(others=>'Z');	
     end case;
 end process;
 
@@ -203,9 +218,9 @@ tx_inst: tx
 	(
 		rst_syn => rst,
 		clk_20M => clk,
-		tx_triger=>cpu_tx_data_valid ,
+		tx_triger=>tx_triger_t,
 		--rcv_data_valid =>cpu_tx_data_valid,
-		rcv_data =>cpu_tx_data_t,
+		rcv_data =>tx_datain,--rcv_data_t,
 		ISL_C1 => ISL_C1,
 		ISL_C0 => ISL_C0,
 		tx_cnt => tx_cnt,
@@ -228,7 +243,7 @@ rx_inst: rx
 		clk_20M => clk,
 		rst_rx_syn => rst,
 		rcv_en => rcv_en, 
-		rx_data => rx_data,
+		rx_data => rx_datain,
 		--rx_data => "001111111111",
 		--rx_data =>plc_channal_data,
 		rx_cnt => rx_cnt,
@@ -246,8 +261,8 @@ data_dir_inst: data_direction
 	     tx_en => tx_en_t,
 	     rx_en =>rx_en_t,
 	     rx_data => rx_data, 
-		   tx_data => tx_data_o,
-		   tx_rx_data => plc_channal_data);	
+		  tx_data => tx_data_o,
+		  tx_rx_data => plc_channal_data);	
   
 end architecture rtl ;	
 
