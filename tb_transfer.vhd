@@ -15,7 +15,7 @@ architecture rtl of tb_transfer is
 		rst_n :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		--din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -124,7 +124,7 @@ u1: transfer PORT map
 		rst_n =>rst_n,
 		clk =>clk,
 		en =>en,
-		--din =>din,
+		din =>din,
 		tx_data_valid=>tx_data_valid,
 		tx_data_o=>tx_data_o,
 		ifft_source_real => ifft_source_real,
