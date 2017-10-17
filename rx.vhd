@@ -35,6 +35,7 @@ ENTITY rx IS
 		pre_cnt :  OUT  STD_LOGIC;
 		rcv_data_valid :  OUT  STD_LOGIC;
 		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		rcv_data_delay:out std_logic_vector(11 downto 0);
 		dma_wr_en:out std_logic
 	);
 END rx;
@@ -90,6 +91,7 @@ PORT MAP(rst => rst_rx_syn,
 		 demap_sink_eop => demap_sink_eop,
 		 demap_sink_valid => demap_sink_valid_t,
 		 demap_dout => demap_dout,
+		 rcv_data=> rcv_data_delay,
 		 dma_wr_en=> dma_wr_en);
 
 rcv_data_valid<=demap_sink_valid_t;
