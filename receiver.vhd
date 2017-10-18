@@ -58,6 +58,7 @@ ARCHITECTURE bdf_type OF receiver IS
 
 COMPONENT syn_cox is
    port(rst_n: in std_logic;
+	    reg_flush:in std_logic;
        clk: in std_logic;
        din: in std_logic_vector(11 downto 0);
        dout1:out std_logic_vector(31 downto 0);
@@ -75,6 +76,7 @@ COMPONENT fft_ctr is
        sink_sop:out std_logic;
        sink_eop:out std_logic;
        payload_data_valid:out std_logic;
+		 reg_flush:out std_logic;
 		 dma_wr_en:out std_logic);
 end COMPONENT fft_ctr;
 
@@ -170,12 +172,13 @@ signal dout1,dout2:std_logic_vector(31 downto 0);
 signal symbol_syn:std_logic_vector(19 downto 0);
 signal fft_data_valid_t,sink_sop_t,sink_eop_t:std_logic;
 signal payload_data_valid:std_logic;
-
+signal reg_flush:std_logic;
 BEGIN 
 
 
 b2v_inst : syn_cox
 PORT MAP(rst_n => rst_n,
+         reg_flush=>reg_flush,
 		 clk => clk,
 		 din => rcv_data_t,
 		 dout1 => dout1,
@@ -193,6 +196,7 @@ b2v_fft_ctr: fft_ctr
 		 sink_sop => sink_sop_t,
      sink_eop =>sink_eop_t,
      payload_data_valid =>payload_data_valid,
+	  reg_flush=>reg_flush,
 	  dma_wr_en=> dma_wr_en);
 
 

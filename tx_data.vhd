@@ -54,14 +54,14 @@ signal valid_t,valid1_t,valid_t1:std_logic;
   process(rst_n,state_cnt) is
        begin
          if rst_n='0' then
-             c0<='1';
+                c0<='1';
 			       c1<='1'; 
          else
             if state_cnt>=2 and state_cnt<=19135 then
-               c0<='0';
+                  c0<='0';
 			         c1<='0';
             else
-               c0<='1';
+                  c0<='1';
 			         c1<='1'; 
             end if;
           end if;

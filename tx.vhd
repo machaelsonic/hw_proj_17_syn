@@ -42,7 +42,7 @@ ARCHITECTURE bdf_type OF tx IS
 COMPONENT transfer
 	PORT
 	(
-		rst_n :  IN  STD_LOGIC;
+		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
 		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
@@ -112,7 +112,7 @@ rst_n_tx_syn <= NOT(rst_syn);
 
 
 b2v_inst1 : transfer
-PORT MAP(rst_n => rst_n_tx_syn,
+PORT MAP(rst => rst_syn,
 		 clk => clk_20M,
 		 en => en,
 		 din => data_gen,

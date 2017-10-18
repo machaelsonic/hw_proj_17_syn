@@ -4,6 +4,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 entity syn_cox is
   port(rst_n: in std_logic;
+       reg_flush:in std_logic;
        clk: in std_logic;
        din: in std_logic_vector(11 downto 0);
        dout1:out std_logic_vector(31 downto 0);
@@ -40,26 +41,27 @@ signal reg_buff,reg1,reg2:ram;
 
 signal reg_o: std_logic_vector(11 downto 0);
 type rom is array (1023 downto 0) of std_logic; --255
-                     
+signal rst_n1:std_logic;                     
  begin
+  rst_n1<=rst_n and (not(reg_flush));
   --reg(0)<=din(11)&din(11)&din(11 downto 2);
   reg(0)<=din;
   g1: for i in 0 to 1022 generate  
-      u1: reg_12 port map(rst_n,clk,reg(i),reg(i+1));   
+      u1: reg_12 port map(rst_n1,clk,reg(i),reg(i+1));   
   end generate;
-     u2:  reg_12 port map(rst_n,clk,reg(1023),reg0(0));
+     u2:  reg_12 port map(rst_n1,clk,reg(1023),reg0(0));
   dout<=reg0(0);
   g2: for i in 0 to 1022 generate  
-      u3: reg_12 port map(rst_n,clk,reg0(i),reg0(i+1));   
+      u3: reg_12 port map(rst_n1,clk,reg0(i),reg0(i+1));   
   end generate;
-     u4:  reg_12 port map(rst_n,clk,reg0(1023),reg_o); 
+     u4:  reg_12 port map(rst_n1,clk,reg0(1023),reg_o); 
 
 
-process(rst_n,clk)is
+process(rst_n1,clk)is
      variable a:std_logic_vector(23 downto 0);
      variable s:std_logic_vector(31 downto 0);
      begin
-        if rst_n='0' then
+        if rst_n1='0' then
            dout2<=(others=>'0');
            s:=(others=>'0');
         elsif clk'event and clk='1' then
@@ -69,11 +71,11 @@ process(rst_n,clk)is
         --dout2<=s(27 downto 0)&"0000";
         dout2<=s;
   end process; 
- process(rst_n,clk)is
+ process(rst_n1,clk)is
      variable a:std_logic_vector(23 downto 0);
      variable s:std_logic_vector(31 downto 0);
      begin
-        if rst_n='0' then
+        if rst_n1='0' then
            dout1<=(others=>'0');
            s:=(others=>'0');
         elsif clk'event and clk='1' then

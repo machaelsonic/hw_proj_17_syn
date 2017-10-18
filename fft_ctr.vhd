@@ -12,30 +12,33 @@ entity fft_ctr is
        sink_sop:out std_logic;
        sink_eop:out std_logic;
        payload_data_valid:out std_logic;
+		 reg_flush:out std_logic;
 		 dma_wr_en:out std_logic);
 end entity fft_ctr;
 
 architecture rtl of fft_ctr is
     constant win_offset:integer range 0 to 127:=50;
-	 constant num:integer range 0 to 31:=10;
+	 constant num:integer range 0 to 1023:=1023;
+	 constant num1:integer range 0 to 10:=10;
     signal s_fft_cnt,cnt:integer range 0 to 13999;--12494
-	 signal s_rcv_cnt,s_idle2_cnt,s_idle3_cnt:integer range 0 to 10;
+	 signal s_rcv_cnt,s_idle_cnt:integer range 0 to 1023;
 	 signal s_rcv_timeout_cnt:integer range 0 to 15000;
     signal s_find_cnt:integer  range 0 to 500;
     signal s_find_timeout_cnt:integer range 0 to 2000;
     signal min_frame_syn:std_logic_vector(31  downto 0);
-    type state_t is (s_rst,s_idle,s_idle1,s_idle2,s_idle3,s_rcv,s_find,s_fft);
+    type state_t is (s_rst,s_idle,s_rcv,s_find,s_fft);
     signal state,next_state:state_t;
 	 attribute keep:boolean;
 	 attribute keep of state:signal is true;
 	 attribute keep of next_state:signal is true;
-   signal reg1,reg2,reg3:std_logic_vector(31 downto 0);
-	signal  s_idle2_timeout_cnt,s_idle3_timeout_cnt:integer range 0 to 2047;
-	
+	signal  dout1_reg,dout2_reg:std_logic_vector(35 downto 0); 
+	constant p: std_logic_vector(3 downto 0):="0110";
  begin
    
-	reg2(31 downto 28)<=(others=>dout1(31));
-	reg2(27 downto 0)<=dout1(31 downto 4);
+	dout2_reg<=dout2&"0000";
+	
+  dout1_reg<= dout1*p ;
+	
 	
    cnt_o<=cnt; 
    process(rst_n,clk) is
@@ -47,7 +50,7 @@ architecture rtl of fft_ctr is
       end if;
 end process;
 
- process(state,rst_n,s_idle3_cnt,s_idle2_cnt,s_idle3_timeout_cnt,s_idle2_timeout_cnt,s_rcv_timeout_cnt,s_rcv_cnt,s_find_timeout_cnt,s_find_cnt,s_fft_cnt,reg1,reg2) is
+ process(state,rst_n,s_idle_cnt,s_rcv_timeout_cnt,s_rcv_cnt,s_find_timeout_cnt,s_find_cnt,s_fft_cnt) is
       begin
         case state is
           when s_rst =>
@@ -57,41 +60,16 @@ end process;
                 next_state<=s_rst;
              end if;
 				 
-			 when s_idle =>
-		        --if  signed(reg2)>signed(reg1) and (signed(reg1)/=0) then
-				  if  signed(reg2)>signed(reg1) then
-					  next_state<=s_idle1;
-					  --reg3<=reg1;
-              else
-                 next_state<=s_idle;
-              end if;
-			 when s_idle1 =>
-			       next_state<=s_idle2;
-			 when s_idle2 =>
-			    if s_idle2_timeout_cnt<2047 then
-			       if s_idle2_cnt=num then
-				       next_state<=s_idle3;
-                else
-                   next_state<=s_idle2;
-                end if;
-				 else
-				   next_state<=s_idle;
-             end if;
-				 
-          when s_idle3 => 
-			   if s_idle3_timeout_cnt<2047 then
-				   if s_idle3_cnt=num then 
+          when s_idle => 
+				   if s_idle_cnt=num then 
                  next_state<=s_rcv;
                else
-                 next_state<=s_idle3;
+                 next_state<=s_idle;
                end if;
-            else
-				   next_state<=s_idle;
-            end if;
 				 
           when s_rcv =>  
               if s_rcv_timeout_cnt<15000 then
-                 if   s_rcv_cnt=num  then 
+                 if   s_rcv_cnt=num1  then 
                       next_state<=s_find;
                  else
                       next_state<=s_rcv;
@@ -122,18 +100,14 @@ end process;
     begin
       if rst_n='0' then
          min_frame_syn<=(others=>'0');
-			s_idle3_cnt<=0;
-			s_idle2_cnt<=0;
-			s_idle3_timeout_cnt<=0;
-			s_idle2_timeout_cnt<=0;
+			s_idle_cnt<=0;
          s_rcv_cnt<=0;
 			s_rcv_timeout_cnt<=0;
 			s_find_cnt<=0;
 			s_find_timeout_cnt<=0;
 			s_fft_cnt<=0;
-			reg3<=(others=>'0');
-			reg1<=(others=>'0');
 			dma_wr_en<='0';
+			reg_flush<='0';
       elsif clk'event and clk='1' then
         case state is
           when s_idle => 
@@ -142,55 +116,24 @@ end process;
 					 s_find_cnt<=0;
 			       s_find_timeout_cnt<=0;
 			       s_fft_cnt<=0;
-					 reg3<=(others=>'0');
-					 reg1<=dout1;
-					 
-			 when s_idle1 =>
-	             reg3<=reg1;
-					 reg1<=(others=>'0');
-			 when s_idle2 =>
-					 if  s_idle2_timeout_cnt=2047 then
-					     s_idle2_timeout_cnt<=0;
-					 else
-					     s_idle2_timeout_cnt<=s_idle2_timeout_cnt+1;
-					 end if;
-					 
-			       if signed(reg2)>signed(reg3) then
-					    if s_idle2_cnt=num then
-						    s_idle2_cnt<=0;
+					 reg_flush<='0';
+					 if signed(dout2_reg)> signed(dout1_reg) then
+					    if s_idle_cnt=num then
+					      s_idle_cnt<=0;
 						 else
-						     s_idle2_cnt<=s_idle2_cnt+1;
+						   s_idle_cnt<=s_idle_cnt+1;
 						 end if;
 					 else
-					   s_idle2_cnt<=0;
-					 end if;
-			when s_idle3=> 
-			      reg3<=(others=>'0');
-			      s_idle2_cnt<=0;
-			      s_idle2_timeout_cnt<=0;
-			   
-					 if  s_idle3_timeout_cnt=2047 then
-					     s_idle3_timeout_cnt<=0;
-					 else
-					     s_idle3_timeout_cnt<=s_idle3_timeout_cnt+1;
-					 end if;  
-					 
-					 if (signed(dout2(27 downto 0)&"0000")>signed(dout1))  then
-					    if s_idle3_cnt=num then
-					      s_idle3_cnt<=0;
-						 else
-						   s_idle3_cnt<=s_idle3_cnt+1;
-						 end if;
-					 else
-					   s_idle3_cnt<=0;
+					   s_idle_cnt<=0;
 					 end if;
           when  s_rcv =>
-			        s_idle3_cnt<=0;
-			        s_idle3_timeout_cnt<=0;
+			        s_idle_cnt<=0;
 					    if s_rcv_timeout_cnt=15000 then
 				          s_rcv_timeout_cnt<=0;
 							 dma_wr_en<='0';
+							 reg_flush<='1';
 				       else
+						    reg_flush<='0';
                       s_rcv_timeout_cnt<=s_rcv_timeout_cnt+1;
 							 if s_rcv_timeout_cnt>=2048 and s_rcv_timeout_cnt<=3071 then
 							    dma_wr_en<='1';
@@ -199,9 +142,8 @@ end process;
 							 end if; 
 						 end if;
 						 
-					  --if  (signed(dout2)<signed(dout1(30 downto 0)&'0'))  then
-					    if (signed(dout2(27 downto 0)&"0000")<signed(dout1))  then
-							if s_rcv_cnt=num then
+					    if signed(dout2_reg)< signed(0-dout1_reg)  then
+							if s_rcv_cnt=num1 then
 							   min_frame_syn<=dout2;
 							   s_rcv_cnt<=0;	
 							 else
@@ -216,8 +158,10 @@ end process;
 				  s_rcv_timeout_cnt<=0;
 				  if s_find_timeout_cnt=2000 then
 				     s_find_timeout_cnt<=0;
+					  reg_flush<='1';
 				  else
                  s_find_timeout_cnt<=s_find_timeout_cnt+1;
+					  reg_flush<='0';
 				  end if;
 				  
             if  signed(dout2)>signed(min_frame_syn) then
@@ -233,10 +177,13 @@ end process;
           when s_fft =>
               s_find_cnt<=0;
 				  s_find_timeout_cnt<=0;
+				  
              if s_fft_cnt=12544-win_offset  then
                  s_fft_cnt<=0;
+					  reg_flush<='1';
              else
                  s_fft_cnt<=s_fft_cnt+1;
+					  reg_flush<='0';
             end if;
           when others => null; 
         end case;

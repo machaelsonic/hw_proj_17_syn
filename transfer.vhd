@@ -25,7 +25,7 @@ LIBRARY work;
 ENTITY transfer IS 
 	PORT
 	(
-		rst_n :  IN  STD_LOGIC;
+		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
 		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
@@ -195,7 +195,7 @@ SIGNAL	send_data_valid_t:  STD_LOGIC;
 SIGNAL	tx_ctr_do_t :  STD_LOGIC_VECTOR(415 DOWNTO 0);
 SIGNAL	 ifft_sink_ready_t: std_logic;
 
-
+SIGNAL rst_n: std_logic;
 
 --signal cnt_t: integer range 0 to 1023;
 --signal a: std_logic_vector(11 downto 0);
@@ -208,6 +208,11 @@ signal frame_flag,ifft_source_valid_t:std_logic;
 --signal din:std_logic_vector(415 downto 0);
 
 BEGIN 
+
+rst_n <= NOT(rst or not(en));
+--rst_n <= NOT rst;
+
+
 ifft_data_valid <=ifft_data_valid_t;
 ifft_dout_imag  <=ifft_dout_imag_t;
 ifft_dout_real  <=ifft_dout_real_t;

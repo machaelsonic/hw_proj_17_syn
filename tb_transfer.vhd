@@ -11,11 +11,11 @@ end entity tb_transfer;
 architecture rtl of tb_transfer is 
  component transfer IS 
 	PORT
-	(
+		(
 		rst_n :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		--din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -43,6 +43,7 @@ architecture rtl of tb_transfer is
 		ifft_source_real :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_source_valid: out std_logic;
 		pre_win_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		pre_inverse:out std_logic;
 		ram1_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram2_d :  OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ram_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
@@ -50,7 +51,9 @@ architecture rtl of tb_transfer is
 		ram_wr_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		rd_cnt_o :  OUT  STD_LOGIC_VECTOR(10 DOWNTO 0);
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
-		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0)
+		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		c0:out std_logic;
+		c1:out std_logic
 	);
 END component transfer;
 
@@ -68,6 +71,7 @@ signal ifft_source_real :STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal pre_win_data_valid :STD_LOGIC;
 signal pre_win_data :STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal ifft_source_valid:std_logic;
+signal ISL_C0,ISL_C1:std_logic;
 begin
 
 
@@ -124,13 +128,15 @@ u1: transfer PORT map
 		rst_n =>rst_n,
 		clk =>clk,
 		en =>en,
-		--din =>din,
+		din =>tmp,
 		tx_data_valid=>tx_data_valid,
 		tx_data_o=>tx_data_o,
 		ifft_source_real => ifft_source_real,
 		pre_win_data => pre_win_data,
 		pre_win_data_valid => pre_win_data_valid,
-		ifft_source_valid=>ifft_source_valid);
+		ifft_source_valid=>ifft_source_valid,
+		c0=>ISL_C0,
+		c1=>ISL_C1);
 		-- ram_rd_en,
 		-- ram_wr_en,
 		-- tx_data_valid,

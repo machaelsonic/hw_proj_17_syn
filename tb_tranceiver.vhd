@@ -30,7 +30,7 @@ component tranceiver is
 END component tranceiver;
 
 --FILE tb_tx_data_tranceiver:TEXT OPEN WRITE_MODE IS "tb_tx_data_tranceiver.txt";
-FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_tranceiver.txt";
+FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_tranceiver3.txt";
 --FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "rcv_data3.txt";
 signal cnt_1:integer range 0 to 49999;
 signal tmp,cpu_tx_data,cpu_rx_data :std_logic_vector(31 downto 0);
@@ -90,7 +90,7 @@ END PROCESS ;
 		end process;
 
 --cpu_tx_data_valid<=d_t;
- cpu_tx_data_valid<='0';
+cpu_tx_data_valid<='0';
 --dout<="101001011010010110100101101001011010";
 cpu_tx_data<=tmp; 
 --process
