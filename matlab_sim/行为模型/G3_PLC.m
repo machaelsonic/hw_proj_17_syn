@@ -17,7 +17,7 @@ frame_length=fft_point*10+payload_num*(fft_point+cp_num); %帧长度=19132;
 
 ofdm_window_offset=50;%定义ofdm窗口的提前量
 
-phase_data=load('E:\design\QUARTUS\plc_design_final.git\matlab_sim\行为模型\phase_rev.txt'); %从文件中读取前导序列相位
+phase_data=load('phase_rev.txt'); %从文件中读取前导序列相位
 
  %根据使用的子载波情况生成m符号相位
 for k1=first_carrier_id:last_carrier_id
@@ -32,6 +32,14 @@ frame_num=1;%发送帧个数
 err_cnt=zeros(1,frame_num);%帧误码计数
 err_total=0; %总误码计数
 tx_data_matlab=[];
+
+% payload_data = randint(1,416,2);
+% save2file_row('f:\lhf\hw_proj_17_syn\sim_data\din_m.txt',payload_data);
+fid = fopen('f:\lhf\hw_proj_17_syn\sim_data\din_m.txt');
+payload_data = (fread(fid)-'0')';
+fclose(fid);
+
+
 for frame_id=1:frame_num
     
     pre_phase=m_phase;%生成第一个payload symbol的参考相位
@@ -42,7 +50,8 @@ for frame_id=1:frame_num
     for k1=1:payload_num
         %[load_data,valid_data]=data_gen;
          %data=rand(1,carrier_num);%产生随机数据
-         data= double(dec2bin(frame_id,carrier_num))-double('0');%产生递增数据：1，2，3，4，5......
+%          data= double(dec2bin(frame_id,carrier_num))-double('0');%产生递增数据：1，2，3，4，5......
+        data = payload_data;
  
         [load_data,valid_data,valid_data_map,pre_phase_next]=data_gen(pre_phase,data,carrier_num,fft_point,first_carrier_id,last_carrier_id);
         
@@ -70,7 +79,11 @@ for frame_id=1:frame_num
     
     [pre_data,p]=preamble(phase_data,fft_point,first_carrier_id,last_carrier_id);%生成前导序列，包含8个p符号和2个m符号，10240个采样点
     % tx_data=[pre_data*16 send_data_ifft_r_rtl*4]; %发送到电力线上的数据， 共19132个采样点,对前导序列放大16倍,实际设计过程中可根据具体数值进行调整
-     tx_data=[pre_data*16 send_data_ifft_r*16];%理论发送数据，采用fft函数实现
+    % tx_data=[pre_data*16 send_data_ifft_r*16];%理论发送数据，采用fft函数实现
+    tx_data = [round(pre_data*16),send_data_ifft_r_rtl*4];
+    save2file('f:\lhf\hw_proj_17_syn\sim_data\tx_data_m.txt', tx_data);
+    
+    
     for k=1:frame_length
         if tx_data(k)>1023
             tx_data(k)=1023;

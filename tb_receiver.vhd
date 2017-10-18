@@ -75,7 +75,8 @@ signal rst,clk:std_logic;
 signal rst_delay:std_logic; 
 
 
-FILE tb_rx_data:TEXT OPEN READ_MODE IS "tb_tx_data_o.txt";
+--FILE tb_rx_data:TEXT OPEN READ_MODE IS "tb_tx_data_o.txt";
+FILE tb_rx_data:TEXT OPEN READ_MODE IS "f:\lhf\hw_proj_17_syn\sim_data\rcv_sig_in.txt";
 FILE tb_syn_cox_sum_mult_ab:TEXT OPEN WRITE_MODE IS "tb_syn_cox_sum_mult_ab.txt";
 FILE tb_syn_cox_sum_mult_a2b2:TEXT OPEN WRITE_MODE IS "tb_syn_cox_sum_mult_a2b2.txt";
 FILE tb_syn_cox_frame_syn:TEXT OPEN WRITE_MODE IS "tb_syn_cox_frame_syn.txt";
@@ -85,6 +86,8 @@ FILE tb_fft_source_imag:TEXT OPEN WRITE_MODE IS "tb_fft_source_imag.txt";
 
 FILE tb_fft_sink_data:TEXT OPEN WRITE_MODE IS "tb_fft_sink_data.txt";
 FILE tb_fft_sink_data_m:TEXT OPEN WRITE_MODE IS "tb_fft_sink_data_m.txt";
+
+FILE demod_bits_v:TEXT OPEN WRITE_MODE IS "f:\lhf\hw_proj_17_syn\sim_data\demod_bits_hex_v.txt";
 
 signal  rx_data_from_file:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal  rx_data_from_file_int_signal:  integer;
@@ -251,6 +254,21 @@ process(rst,clk) is
 			         end if;
 			  end if;
 		   	end process;	
-
+			
+		
+process(rst,clk) is
+    VARIABLE lo_1:LINE;
+	alias demap_sink_v is <<signal i1.demap_sink_v : STD_LOGIC>>; 
+	alias demap_dout is <<signal i1.demap_dout : STD_LOGIC_vector>>;
+	-- alias demap_sink_v is <<signal i1.dma_wr_en  : STD_LOGIC>>; 
+	-- alias demap_dout is <<signal i1.demap_dout : STD_LOGIC_vector>>;
+    begin 
+		if rising_edge(clk) then 
+			if demap_sink_v='1' then
+				HWRITE (lo_1,demap_dout,left,120);
+				WRITELINE (demod_bits_v,lo_1);
+			end if;
+		end if;
+	end process;		   
 		   	  	                                                                     
 END rtl;
