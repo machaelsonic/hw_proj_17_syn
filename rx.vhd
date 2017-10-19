@@ -18,6 +18,7 @@
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all; 
+USE ieee.std_logic_unsigned.all; 
 
 LIBRARY work;
 
@@ -75,17 +76,70 @@ COMPONENT receiver
 	);
 END COMPONENT;
 
-signal tmp:std_logic_vector(7 downto 0);
 signal demap_sink_valid_t:std_logic;
+
+signal  tmp7:std_logic_vector(11 downto 0);
+signal  tmp1,tmp2,tmp3,tmp4,tmp5,tmp6:std_logic_vector(15 downto 0);
 BEGIN 
 
+------------------------High Pass Filer--------------------------------------------
 
+process(rst_rx_syn,clk_20M) is
+  begin
+     if rst_rx_syn='1' then
+          tmp3<=(others=>'0');
+     elsif clk_20M'event and clk_20M='1' then
+          tmp3<=tmp2;
+     end if;
+end process; 
+process(rst_rx_syn,rx_data,tmp5) is
+  begin
+    if rst_rx_syn='1' then
+	    tmp1<=(others=>'0');
+		  tmp2<=(others=>'0');
+	 else
+      tmp1<=rx_data(11)&rx_data(11)&rx_data(11)&rx_data(11)&rx_data(11 downto 0);      
+      tmp2<=(rx_data(11)&rx_data(11)&rx_data(11)&rx_data(11)&rx_data(11 downto 0))+tmp5;
+   end if;
+end process;
+
+process(rst_rx_syn,tmp3) is
+  begin
+    if rst_rx_syn='1' then
+		 tmp4<=(others=>'0');
+		 tmp5<=(others=>'0');
+	 else     
+     tmp4<=tmp3(15)&tmp3(15)&tmp3(15)&tmp3(15)&tmp3(15 downto 4);
+     tmp5<=tmp3-(tmp3(15)&tmp3(15)&tmp3(15)&tmp3(15)&tmp3(15 downto 4));
+   end if;
+end process;
+
+process(rst_rx_syn,tmp1,tmp4) is
+  begin
+    if rst_rx_syn='1' then
+		   tmp6<=(others=>'0');
+	 else     
+       tmp6<=tmp1-tmp4;
+   end if;
+end process;
+tmp7<=tmp6(11 downto 0);
+
+--process(rst_rx_syn,clk_20M) is
+--  begin
+--     if rst_rx_syn='1' then
+--          rx_data_hp<=(others=>'0');
+--     elsif clk_20M'event and clk_20M='1' then
+--          rx_data_hp<=tmp6;
+--     end if;
+--end process; 
+
+------------------------------------------------------------------
 
 b2v_inst : receiver
 PORT MAP(rst => rst_rx_syn,
 		 clk => clk_20M,
 		 rcv_en => rcv_en,
-		 data_in => rx_data,
+		 data_in => tmp7,
 		 cnt_o =>rx_cnt,
 		 demap_sink_sop => demap_sink_sop,
 		 demap_sink_eop => demap_sink_eop,

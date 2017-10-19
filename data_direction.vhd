@@ -49,7 +49,7 @@ architecture  rtl of data_direction is
 			     tmp<=(others=>'Z');
 			 else
 			      tmp<=tx_data;
-			      rx_data<=(others=>'Z');	
+			      rx_data<=(others=>'0');	
 			    end if;
 			  end if;
 		end process;
