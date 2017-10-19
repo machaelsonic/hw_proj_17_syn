@@ -117,7 +117,7 @@ end process;
 			       s_find_timeout_cnt<=0;
 			       s_fft_cnt<=0;
 					 reg_flush<='0';
-					 if signed(dout2_reg)> signed(dout1_reg) then
+					 if (signed(dout2_reg)> signed(dout1_reg)) and (dout1>=3276800) then
 					    if s_idle_cnt=num then
 					      s_idle_cnt<=0;
 						 else
