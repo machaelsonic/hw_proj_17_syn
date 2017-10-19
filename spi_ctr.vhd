@@ -119,7 +119,7 @@ architecture rtl of spi_ctr is
 				cnt_en1<='0';
 				ad_rst<='1';
             if cnt<18 then
-					  dout<="0000100101001111";--R09--010101 -- rx gain --001111
+					  dout<="0000100101101010";--R09--010101 -- rx gain --001111
 					  
             elsif cnt<37 then
 					dout<="0000011100000000";--R07
