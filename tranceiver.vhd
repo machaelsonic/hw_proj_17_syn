@@ -8,7 +8,6 @@ entity tranceiver is
          clk: in std_logic;
 			m_s:in std_logic;--master='1',slave='0'
 		   plc_channal_data: inout std_logic_vector(11 downto 0);
-			--plc_channal_data: in std_logic_vector(11 downto 0);
 		   cpu_tx_data:in std_logic_vector(31 downto 0); --415
 		   cpu_tx_data_valid: in std_logic;
 		   tx_data_valid:out std_logic;
@@ -20,7 +19,8 @@ entity tranceiver is
 		   cpu_rx_data_valid:out std_logic;
 		   cpu_rx_data:out std_logic_vector(31 downto 0);--415
 			rcv_data_delay:out std_logic_vector(11 downto 0);
-			dma_wr_en:out std_logic);
+			dma_wr_en:out std_logic;
+			xmt_ram_wr_en:out std_logic);
 end entity tranceiver;
 architecture rtl of tranceiver is
 
@@ -31,13 +31,13 @@ component tx IS
 		rst_syn :  IN  STD_LOGIC;
 		clk_20M :  IN  STD_LOGIC;
 		tx_triger: in std_logic;
-		--rcv_data_valid :  IN  STD_LOGIC;
-		rcv_data :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ISL_C1 :  OUT  STD_LOGIC;
 		ISL_C0 :  OUT  STD_LOGIC;
 		tx_cnt:OUT  STD_LOGIC_VECTOR(14 DOWNTO 0);
 		tx_data_valid :  OUT  STD_LOGIC;
-		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0)
+		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		xmt_ram_wr_en:out std_logic
 	);
 END component tx;
 
@@ -70,6 +70,9 @@ component data_direction is
 		   tx_rx_data:inout std_logic_vector(11 downto 0));
 end component data_direction;
 
+
+
+
 signal tx_data_valid_t:std_logic;
 signal tx_data_o,rx_datain:std_logic_vector(11 downto 0);
 signal rcv_en:std_logic;
@@ -86,12 +89,6 @@ signal delay_cnt:integer range 0 to 127;
 signal delay_cnt_en:std_logic;
 begin
 
-
-
---cpu_tx_data_t(31 downto 0)<="00001010010110100101101001011010";
-cpu_tx_data_t(31 downto 0)<=cpu_tx_data;
-
-cpu_tx_data_t(415 downto 32)<=(others=>'0');
 cpu_rx_data<= cpu_rx_data_t(31 downto 0);
 
 
@@ -104,7 +101,7 @@ cpu_rx_data<= cpu_rx_data_t(31 downto 0);
         end if;
  end process;
  
- process(state,rst,cpu_tx_data_valid,rx_cnt,tx_cnt,delay_cnt) is
+ process(state,rst,cpu_tx_data_valid,tx_cnt,delay_cnt) is
     begin
        case state is
         when s_rst =>
@@ -187,34 +184,21 @@ process(rst,clk) is
 			end if;
 	 end if;
 end process;
-
-
-
--- flag<='1';
---rx_en_t<='1';
---tx_en_t<='0';
---ISL_C1<='1';
---ISL_C0<='1';
---rcv_en<='1';
---tx_data_valid<='0';
-
-
---  flag_o<=flag;     
+ 
                  
 tx_inst: tx 
   PORT map 
 	(
 		rst_syn => rst,
 		clk_20M => clk,
-		--tx_triger=>cpu_tx_data_valid,
 		tx_triger=>tx_en_t,
-		--rcv_data_valid =>cpu_tx_data_valid,
-		rcv_data =>cpu_tx_data_t,
+		xmt_ram_wr_data=>cpu_tx_data,
 		ISL_C1 => ISL_C1,
 		ISL_C0 => ISL_C0,
 		tx_cnt => tx_cnt,
 		tx_data_valid => tx_data_valid_t,
-		tx_data_o =>tx_data_o
+		tx_data_o =>tx_data_o,
+		xmt_ram_wr_en=>xmt_ram_wr_en
 	);
 	
 rcv_en<=rx_en_t; 
@@ -233,8 +217,6 @@ rx_inst: rx
 		rst_rx_syn => rst,
 		rcv_en => rcv_en, 
 		rx_data => rx_datain,
-		--rx_data => "001111111111",
-		--rx_data =>plc_channal_data,
 		rx_cnt => rx_cnt,
 		rcv_data_valid=> cpu_rx_data_valid,
 		demap_dout => cpu_rx_data_t,
@@ -252,6 +234,10 @@ data_dir_inst: data_direction
 	     rx_data => rx_datain, 
 		  tx_data => tx_data_o,
 		  tx_rx_data => plc_channal_data);	
+		  
+		  
+	  
+		  
   
 end architecture rtl ;	
 

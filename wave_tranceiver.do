@@ -4,6 +4,75 @@ add wave -noupdate /tb_tranceiver/cnt_1
 add wave -noupdate -radix unsigned /tb_tranceiver/tmp
 add wave -noupdate -radix unsigned /tb_tranceiver/cpu_tx_data
 add wave -noupdate -radix unsigned /tb_tranceiver/cpu_rx_data
+add wave -noupdate -divider tx
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rst
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/clk
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/en
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_rd_en
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_wr_en
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/tx_data_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_data_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_sop
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_eop
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_sink_ready
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_sop
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_eop
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rom_rd_en
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/send_data_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_win_data_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_data_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rd_sel
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rd_data_sel
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/wr_sel
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/cnt
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_data
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_dout_imag
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_dout_real
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_error
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_exp
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_imag
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_real
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_valid
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_win_data
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_inverse
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram1_d
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram2_d
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_rd_adr
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_rd_data
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_wr_adr
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rd_cnt_o
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rom_rd_adr
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/tx_data_o
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/c0
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/c1
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_data_valid_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_dout_imag_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_dout_real_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_eop_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_sop_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_ready_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_real_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_sop_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_eop_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_win_data_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_win_data_t1
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_win_data_valid_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_data_valid_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ram_rd_data_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rom_rd_adr_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rom_rd_en_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/send_data_valid_t
+add wave -noupdate -radix hexadecimal /tb_tranceiver/u1/tx_inst/b2v_inst1/tx_ctr_do_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_sink_ready_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/rst_n
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/en_d
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/fft_rst_n
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/en_delay_8
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/tmp
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/pre_inverse_t
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/state_cnt
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/frame_flag
+add wave -noupdate /tb_tranceiver/u1/tx_inst/b2v_inst1/ifft_source_valid_t
 add wave -noupdate /tb_tranceiver/d_t
 add wave -noupdate /tb_tranceiver/rst_n
 add wave -noupdate /tb_tranceiver/clk
@@ -85,7 +154,7 @@ add wave -noupdate -radix decimal /tb_tranceiver/u1/rx_inst/tmp5
 add wave -noupdate -format Analog-Step -height 100 -max 333.0 -min -441.0 -radix decimal /tb_tranceiver/u1/rx_inst/tmp6
 add wave -noupdate -format Analog-Step -height 100 -max 20.0 -min -28.0 -radix decimal /tb_tranceiver/u1/rx_inst/tmp7
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2083120000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {8588453 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 397
 configure wave -valuecolwidth 58
@@ -101,4 +170,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {3243702 ns}
+WaveRestoreZoom {0 ps} {815388 ns}

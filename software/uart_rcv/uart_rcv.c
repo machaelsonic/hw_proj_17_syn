@@ -21,9 +21,9 @@ volatile alt_u8 RxPtr,RxStart;
 //volatile int  uart_iq_capture;
 //volatile int pio_iq_capture;
 alt_u32 cnt;
-alt_u8 i;
+alt_u8 i,m_s;
 
-alt_u8 rcv_bank[6];
+//alt_u8 rcv_bank[6];
 
 void delay(unsigned int i)
 {
@@ -77,7 +77,8 @@ void data_rcv_isr (void* context,alt_u32 id)
 				 }
 				 //IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x00);//master_salve=0;
 
-				 if(rcv_data != send_data_bak +1)
+				 //if(rcv_data != send_data_bak +1)
+				 if (m_s==0)
 				 {
 					 IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x01);
 					 IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x00);
@@ -131,6 +132,7 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
 		    		RxStart=0;
 		    		send_data=((ReceBuf[0]|0x00000000)<<24)|((ReceBuf[1]|0x00000000)<<16)|((ReceBuf[2]|0x00000000)<<8)|ReceBuf[3];//0x5A5A5A5A;
 		    		IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
+		    		m_s=1;
 		    		{
 		    		IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_BASE,send_data);
 		    		IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x01);
@@ -178,7 +180,7 @@ int main (void)
  IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x00);//master_salve=0;
  cnt=0;
  i=0;
-
+ m_s=0;
 
 
  alt_irq_register(DATA_IN_VALID_IRQ, (void*)&pio_iq_capture, data_rcv_isr);

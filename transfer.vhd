@@ -28,7 +28,7 @@ ENTITY transfer IS
 		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -42,7 +42,6 @@ ENTITY transfer IS
 		send_data_valid :  OUT  STD_LOGIC;
 		pre_win_data_valid :  OUT  STD_LOGIC;
 		ram_data_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -66,7 +65,8 @@ ENTITY transfer IS
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END transfer;
 
@@ -159,22 +159,22 @@ COMPONENT tx_data
 END COMPONENT;
 
 COMPONENT tx_ctr
-	PORT(rst_n : IN STD_LOGIC;
-		 clk : IN STD_LOGIC;
-		 en : IN STD_LOGIC;
-		 ifft_eop : IN STD_LOGIC;
-		 din : IN STD_LOGIC_VECTOR(415 DOWNTO 0);
-		 rd_en : OUT STD_LOGIC;
-		 frame_flag:out std_logic;
-		 send_data_valid : OUT STD_LOGIC;
-		 ram_data_valid : OUT STD_LOGIC;
-		 flag_o : OUT STD_LOGIC;
-		 adr : OUT STD_LOGIC_VECTOR(9 DOWNTO 0);
-		 cnt_o : OUT STD_LOGIC_VECTOR(14 DOWNTO 0);
-		 dout : OUT STD_LOGIC_VECTOR(415 DOWNTO 0);
-		 pre_inverse:out std_logic
+	 port(rst_n: in std_logic;
+       clk: in std_logic;
+       en: in std_logic;
+		 xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+       rom_rd_en:out std_logic;
+       rom_adr:out std_logic_vector(9 downto 0);
+	    cnt_o:OUT STD_LOGIC_VECTOR(14 DOWNTO 0);
+	    frame_flag:out std_logic;
+	    send_data_valid:out std_logic;
+       ram_data_valid: out std_logic;
+	    send_data_o:out std_logic_vector(415 downto 0);
+	    pre_inverse:out std_logic;
+		 xmt_ram_wr_en_o:out std_logic
 	);
 END COMPONENT;
+
 
 SIGNAL	ifft_data_valid_t:  STD_LOGIC;
 SIGNAL	ifft_dout_imag_t :  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -376,22 +376,17 @@ PORT MAP(rst_n => rst_n,
 b2v_inst5 : tx_ctr
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
-		 --en => en,
 		 en => en_delay_8,
-		 ifft_eop => ifft_eop_t,
-		 din => din,
-		 rd_en => rom_rd_en_t,
+		 xmt_ram_wr_data=>xmt_ram_wr_data,
+		 rom_rd_en => rom_rd_en_t,
 		 frame_flag =>frame_flag,
 		 send_data_valid => send_data_valid_t,
 		 ram_data_valid => pre_win_data_valid_t,
-		 flag_o => flag_o,
-		 adr => rom_rd_adr_t,
+		 rom_adr => rom_rd_adr_t,
 		 cnt_o => state_cnt,
-		 dout => tx_ctr_do_t,
-		 pre_inverse =>pre_inverse_t);
-
--- ifft_dout_imag_t<=(others=>'0');
--- ifft_dout_real_t<=conv_std_logic_vector(cnt_t,12);
---a<=conv_std_logic_vector(cnt_t,12);
+		 send_data_o=> tx_ctr_do_t,
+		 pre_inverse =>pre_inverse_t,
+		 xmt_ram_wr_en_o=>xmt_ram_wr_en);
+		  
  
 END bdf_type;

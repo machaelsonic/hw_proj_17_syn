@@ -14,7 +14,7 @@ component plc_design
 		clk_tx :  IN  STD_LOGIC;
 		rst_n_tx :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		datain :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		receiver_din: IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_sink_ready :  OUT  STD_LOGIC;
 		ifft_source_sop :  OUT  STD_LOGIC;
@@ -39,7 +39,6 @@ component plc_design
 		demap_sink_sop :  OUT  STD_LOGIC;
 		demap_sink_eop :  OUT  STD_LOGIC;
 		demap_sink_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -79,7 +78,8 @@ component plc_design
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END component plc_design;
 
@@ -89,6 +89,9 @@ signal d_t:std_logic;
 signal rst_n_tx,clk_tx,en:std_logic;
 signal tx_data_o_t,receiver_din:std_logic_vector(11 downto 0);
 signal demap_out :std_logic_vector(15 downto 0);
+signal xmt_ram_wr_data: std_logic_vector(31 downto 0);
+signal xmt_ram_wr_en: std_logic;
+signal  xmt_ram_wr_cnt:std_logic_vector(6 downto 0);
 begin
 
 
@@ -136,19 +139,20 @@ END PROCESS ;
 			 
 		end process;
 
-en<=d_t;
+en<='1';
 --dout<="101001011010010110100101101001011010";
-datain<=tmp; 
+--datain<=tmp; 
 
 u1: plc_design PORT map 
 	(
 		clk_tx =>clk_tx,
 		rst_n_tx=>rst_n_tx,
 		en =>en,
-		datain=>datain,
+		xmt_ram_wr_data=>xmt_ram_wr_data,
 		receiver_din => receiver_din,
 		demap_dout =>demap_dout,
-		tx_data_o =>tx_data_o_t);
+		tx_data_o =>tx_data_o_t,
+		xmt_ram_wr_en=>xmt_ram_wr_en);
 		
 		receiver_din<=tx_data_o_t;
 		
@@ -190,6 +194,26 @@ u1: plc_design PORT map
 		-- rd_cnt_o,
 		-- rom_rd_adr,
 		-- tx_data_o);
+		
+		process(rst_n_tx,clk_tx) is
+     begin
+	    if rst_n_tx='0' then
+         xmt_ram_wr_cnt<=(others=>'0');
+      elsif clk_tx'event and clk_tx='1' then
+         if xmt_ram_wr_en='1' then
+			     if xmt_ram_wr_cnt=77 then
+			         xmt_ram_wr_cnt<=(others=>'0');        
+           else
+                 xmt_ram_wr_cnt<=xmt_ram_wr_cnt+1;
+           end if;
+         else
+           xmt_ram_wr_cnt<=(others=>'0');
+        end if;
+      end if; 
+  end process;
+  
+ xmt_ram_wr_data(31 downto 7)<=(others=>'0');
+ xmt_ram_wr_data(6 downto 0)<=xmt_ram_wr_cnt;	
 		
 end rtl;
 

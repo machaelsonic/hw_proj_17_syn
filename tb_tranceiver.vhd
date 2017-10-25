@@ -89,8 +89,8 @@ END PROCESS ;
 			 
 		end process;
 
---cpu_tx_data_valid<=d_t;
-cpu_tx_data_valid<='0';
+cpu_tx_data_valid<=d_t;
+--cpu_tx_data_valid<='0';
 --dout<="101001011010010110100101101001011010";
 cpu_tx_data<=tmp; 
 --process

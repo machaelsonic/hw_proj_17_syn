@@ -27,13 +27,13 @@ ENTITY tx IS
 		rst_syn :  IN  STD_LOGIC;
 		clk_20M :  IN  STD_LOGIC;
 		tx_triger: in std_logic;
-		--rcv_data_valid :  IN  STD_LOGIC;
-		rcv_data :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ISL_C1 :  OUT  STD_LOGIC;
 		ISL_C0 :  OUT  STD_LOGIC;
 		tx_cnt:OUT  STD_LOGIC_VECTOR(14 DOWNTO 0);
 		tx_data_valid :  OUT  STD_LOGIC;
-		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0)
+		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
+		xmt_ram_wr_en:out std_logic
 	);
 END tx;
 
@@ -45,7 +45,7 @@ COMPONENT transfer
 		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -59,7 +59,6 @@ COMPONENT transfer
 		send_data_valid :  OUT  STD_LOGIC;
 		pre_win_data_valid :  OUT  STD_LOGIC;
 		ram_data_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -83,7 +82,8 @@ COMPONENT transfer
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END COMPONENT;
 
@@ -91,9 +91,7 @@ COMPONENT rx_to_tx
 	PORT(rst_n : IN STD_LOGIC;
 		 clk : IN STD_LOGIC;
 		 rcv_data_valid : IN STD_LOGIC;
-		 rcv_data : IN STD_LOGIC_VECTOR(415 DOWNTO 0);
-		 en : OUT STD_LOGIC;
-		 dout : OUT STD_LOGIC_VECTOR(415 DOWNTO 0)
+		 en : OUT STD_LOGIC
 	);
 END COMPONENT;
 
@@ -115,21 +113,20 @@ b2v_inst1 : transfer
 PORT MAP(rst => rst_syn,
 		 clk => clk_20M,
 		 en => en,
-		 din => data_gen,
+		 xmt_ram_wr_data=>xmt_ram_wr_data,
 		 tx_data_valid => tx_data_valid,
 		 c0 => c0,
 		 c1 => c1,
 		 cnt =>tx_cnt,
-		 tx_data_o => tx_data_o);
+		 tx_data_o => tx_data_o,
+		 xmt_ram_wr_en=>xmt_ram_wr_en);
 
 
 b2v_inst2 : rx_to_tx
 PORT MAP(rst_n => rst_n_tx_syn,
 		 clk => clk_20M,
 		 rcv_data_valid => tx_triger,
-		 rcv_data => rcv_data,
-		 en => en,
-		 dout => data_gen);
+		 en => en);
 
 ISL_C1 <= c1;
 ISL_C0 <= c0;

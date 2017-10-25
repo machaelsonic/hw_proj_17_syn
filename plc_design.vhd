@@ -11,7 +11,7 @@ ENTITY plc_design IS
 		clk_tx :  IN  STD_LOGIC;
 		rst_n_tx :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		datain :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		receiver_din: IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_sink_ready :  OUT  STD_LOGIC;
 		ifft_source_sop :  OUT  STD_LOGIC;
@@ -36,7 +36,6 @@ ENTITY plc_design IS
 		demap_sink_sop :  OUT  STD_LOGIC;
 		demap_sink_eop :  OUT  STD_LOGIC;
 		demap_sink_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -76,7 +75,8 @@ ENTITY plc_design IS
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END plc_design;
 
@@ -117,10 +117,10 @@ END COMPONENT;
 COMPONENT transfer
 	PORT
 	(
-		rst_n :  IN  STD_LOGIC;
+		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -134,7 +134,6 @@ COMPONENT transfer
 		send_data_valid :  OUT  STD_LOGIC;
 		pre_win_data_valid :  OUT  STD_LOGIC;
 		ram_data_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -158,7 +157,8 @@ COMPONENT transfer
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END COMPONENT;
 
@@ -205,11 +205,10 @@ PORT MAP(clk => clk_tx,
 
 
 b2v_inst1 : transfer
-PORT MAP(rst_n => rst_n_tx_syn,
+PORT MAP(rst => rst_rx_syn,
 		 clk => clk_tx,
 		 en => en,
-		 --din => datain_t,
-		 din => datain,
+		 xmt_ram_wr_data=>xmt_ram_wr_data,
 		 ram_rd_en => ram_rd_en,
 		 ram_wr_en => ram_wr_en,
 		 tx_data_valid => tx_data_valid,
@@ -223,7 +222,6 @@ PORT MAP(rst_n => rst_n_tx_syn,
 		 send_data_valid => send_data_valid,
 		 pre_win_data_valid => pre_win_data_valid,
 		 ram_data_valid => ram_data_valid,
-		 flag_o => flag_o,
 		 rd_sel => rd_sel,
 		 rd_data_sel => rd_data_sel,
 		 wr_sel => wr_sel,
@@ -247,7 +245,8 @@ PORT MAP(rst_n => rst_n_tx_syn,
 		 rom_rd_adr => rom_rd_adr,
 		 tx_data_o => tx_data_o,
 		 c0 =>c0,
-		 c1 =>c1);
+		 c1 =>c1,
+		 xmt_ram_wr_en=>xmt_ram_wr_en);
 		 
 		 
 		 

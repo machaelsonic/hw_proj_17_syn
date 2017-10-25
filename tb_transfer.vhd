@@ -12,10 +12,10 @@ architecture rtl of tb_transfer is
  component transfer IS 
 	PORT
 		(
-		rst_n :  IN  STD_LOGIC;
+		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		din :  IN  STD_LOGIC_VECTOR(415 DOWNTO 0);
+		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -29,7 +29,6 @@ architecture rtl of tb_transfer is
 		send_data_valid :  OUT  STD_LOGIC;
 		pre_win_data_valid :  OUT  STD_LOGIC;
 		ram_data_valid :  OUT  STD_LOGIC;
-		flag_o :  OUT  STD_LOGIC;
 		rd_sel :  OUT  STD_LOGIC;
 		rd_data_sel :  OUT  STD_LOGIC;
 		wr_sel :  OUT  STD_LOGIC;
@@ -53,7 +52,8 @@ architecture rtl of tb_transfer is
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic
+		c1:out std_logic;
+		xmt_ram_wr_en:out std_logic
 	);
 END component transfer;
 
@@ -72,6 +72,11 @@ signal pre_win_data_valid :STD_LOGIC;
 signal pre_win_data :STD_LOGIC_VECTOR(11 DOWNTO 0);
 signal ifft_source_valid:std_logic;
 signal ISL_C0,ISL_C1:std_logic;
+signal xmt_ram_rd_en:std_logic;
+signal xmt_ram_rd_adr:std_logic_vector(6 downto 0);
+signal xmt_ram_wr_data: std_logic_vector(31 downto 0);
+signal xmt_ram_wr_en: std_logic;
+signal  xmt_ram_wr_cnt:std_logic_vector(6 downto 0);
 begin
 
 
@@ -99,36 +104,52 @@ END PROCESS ;
 
 
 
+-- process(rst_n,clk) is
+--		  begin
+--		    if rst_n='0' then
+--			    cnt_1<=25900;
+--				 d_t<='0';
+--				 tmp<=(others=>'0');
+--			 elsif clk'event and clk='1' then
+--			    if cnt_1=25999 then
+--				    cnt_1<=0;
+--					 d_t<='1';
+--					 tmp<=tmp+1;
+--				 else
+--				    cnt_1<=cnt_1+1;
+--					 d_t<='0';
+--					 tmp<=tmp;
+--				end if;
+--		    end if;
+--			 
+--		end process;
+
+--en<=d_t;
+en<='1';
+--dout<="101001011010010110100101101001011010";
+--din<=tmp;
  process(rst_n,clk) is
 		  begin
 		    if rst_n='0' then
 			    cnt_1<=25900;
-				 d_t<='0';
-				 tmp<=(others=>'0');
 			 elsif clk'event and clk='1' then
 			    if cnt_1=25999 then
 				    cnt_1<=0;
-					 d_t<='1';
-					 tmp<=tmp+1;
-				 else
+				  else
 				    cnt_1<=cnt_1+1;
-					 d_t<='0';
-					 tmp<=tmp;
-				end if;
+				   end if;
 		    end if;
 			 
-		end process;
-
-en<=d_t;
---dout<="101001011010010110100101101001011010";
-din<=tmp; 
+		end process; 
+		
+		              
 
 u1: transfer PORT map 
 	(
-		rst_n =>rst_n,
+		rst => not(rst_n),
 		clk =>clk,
 		en =>en,
-		din =>tmp,
+		xmt_ram_wr_data=>xmt_ram_wr_data,
 		tx_data_valid=>tx_data_valid,
 		tx_data_o=>tx_data_o,
 		ifft_source_real => ifft_source_real,
@@ -136,7 +157,8 @@ u1: transfer PORT map
 		pre_win_data_valid => pre_win_data_valid,
 		ifft_source_valid=>ifft_source_valid,
 		c0=>ISL_C0,
-		c1=>ISL_C1);
+		c1=>ISL_C1,
+		xmt_ram_wr_en=>xmt_ram_wr_en);
 		-- ram_rd_en,
 		-- ram_wr_en,
 		-- tx_data_valid,
@@ -174,7 +196,29 @@ u1: transfer PORT map
 		-- rd_cnt_o,
 		-- rom_rd_adr,
 		--);
-	
+		
+		
+process(rst_n,clk) is
+     begin
+	    if rst_n='0' then
+         xmt_ram_wr_cnt<=(others=>'0');
+      elsif clk'event and clk='1' then
+         if xmt_ram_wr_en='1' then
+			     if xmt_ram_wr_cnt=77 then
+			         xmt_ram_wr_cnt<=(others=>'0');        
+           else
+                 xmt_ram_wr_cnt<=xmt_ram_wr_cnt+1;
+           end if;
+         else
+           xmt_ram_wr_cnt<=(others=>'0');
+        end if;
+      end if; 
+  end process;
+  
+ xmt_ram_wr_data(31 downto 7)<=(others=>'0');
+ xmt_ram_wr_data(6 downto 0)<=xmt_ram_wr_cnt;	
+ 
+ 
 process(clk) is
  	VARIABLE lo_1:LINE;
     BEGIN
