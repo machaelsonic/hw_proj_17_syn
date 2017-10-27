@@ -14,7 +14,9 @@ component plc_design
 		clk_tx :  IN  STD_LOGIC;
 		rst_n_tx :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		receiver_din: IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_sink_ready :  OUT  STD_LOGIC;
 		ifft_source_sop :  OUT  STD_LOGIC;
@@ -79,9 +81,28 @@ component plc_design
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
 		c1:out std_logic;
-		xmt_ram_wr_en:out std_logic
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END component plc_design;
+
+component xmt_rcv_ram IS 
+  GENERIC(N: INTEGER:=7;
+          W: INTEGER:=32);
+  PORT( rst: IN STD_LOGIC;
+        rd_clk: IN STD_LOGIC;
+		    wr_clk: in std_logic;
+        wr_en:IN STD_LOGIC;
+		    rd_en: in std_logic;
+        wr_adr:IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+		    rd_adr:IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
+        wr_data:IN STD_LOGIC_VECTOR(W-1 DOWNTO 0);
+        rd_data:OUT STD_LOGIC_VECTOR(W-1 DOWNTO 0));
+END component xmt_rcv_ram;
 
 signal cnt_1:integer range 0 to 25999;
 signal tmp,datain,demap_dout :std_logic_vector(415 downto 0);
@@ -89,9 +110,19 @@ signal d_t:std_logic;
 signal rst_n_tx,clk_tx,en:std_logic;
 signal tx_data_o_t,receiver_din:std_logic_vector(11 downto 0);
 signal demap_out :std_logic_vector(15 downto 0);
+signal xmt_ram_rd_en:std_logic;
+signal xmt_ram_rd_adr:std_logic_vector(6 downto 0);
 signal xmt_ram_wr_data: std_logic_vector(31 downto 0);
-signal xmt_ram_wr_en: std_logic;
-signal  xmt_ram_wr_cnt:std_logic_vector(6 downto 0);
+signal xmt_ram_wr_en,xmt_ram_wr_clk: std_logic;
+signal  xmt_ram_wr_cnt,xmt_ram_wr_adr:std_logic_vector(6 downto 0);
+signal xmt_ram_rd_data: STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+signal rx_ram_rd_en,rx_ram_rd_triger:std_logic;
+signal rx_ram_rd_adr:std_logic_vector(6 downto 0);
+signal rx_ram_wr_data: std_logic_vector(31 downto 0);
+signal rx_ram_wr_en,rx_ram_wr_clk: std_logic;
+signal rx_ram_wr_adr:std_logic_vector(6 downto 0);
+signal rx_ram_rd_data: STD_LOGIC_VECTOR(31 DOWNTO 0);
 begin
 
 
@@ -117,7 +148,16 @@ END PROCESS ;
     wait for 20 ns; 
    end process;
 
-
+process
+  begin
+    wait for 800 ns;
+    xmt_ram_wr_en<='1';
+    wait for 3120 ns;
+    xmt_ram_wr_en<='0';
+    wait;
+  end process;
+  xmt_ram_wr_clk<=clk_tx;
+  
 
  process(rst_n_tx,clk_tx) is
 		  begin
@@ -139,7 +179,7 @@ END PROCESS ;
 			 
 		end process;
 
-en<='1';
+--en<='1';
 --dout<="101001011010010110100101101001011010";
 --datain<=tmp; 
 
@@ -148,11 +188,18 @@ u1: plc_design PORT map
 		clk_tx =>clk_tx,
 		rst_n_tx=>rst_n_tx,
 		en =>en,
-		xmt_ram_wr_data=>xmt_ram_wr_data,
+		xmt_ram_rd_en=>xmt_ram_rd_en,
+		xmt_ram_rd_adr=>xmt_ram_rd_adr,	
+		xmt_ram_rd_data=>xmt_ram_rd_data,
 		receiver_din => receiver_din,
 		demap_dout =>demap_dout,
 		tx_data_o =>tx_data_o_t,
-		xmt_ram_wr_en=>xmt_ram_wr_en);
+		rx_ram_wr_data=>rx_ram_wr_data,
+		 rx_ram_wr_en=>rx_ram_wr_en,
+		 rx_ram_wr_clk=>rx_ram_wr_clk,
+		 rx_ram_wr_adr=>rx_ram_wr_adr,
+	   rx_ram_rd_triger=>rx_ram_rd_triger
+		);
 		
 		receiver_din<=tx_data_o_t;
 		
@@ -195,16 +242,31 @@ u1: plc_design PORT map
 		-- rom_rd_adr,
 		-- tx_data_o);
 		
-		process(rst_n_tx,clk_tx) is
+		
+		xmt_rcv_ram_inst:xmt_rcv_ram   
+  GENERIC map(N=>7,W=>32)
+  PORT map( rst=>not(rst_n_tx),
+          rd_clk=>clk_tx,
+		      wr_clk=>xmt_ram_wr_clk,
+          wr_en=>xmt_ram_wr_en,
+		      rd_en=>xmt_ram_rd_en,
+          wr_adr=>xmt_ram_wr_adr,
+		      rd_adr=>xmt_ram_rd_adr,
+          wr_data=>xmt_ram_wr_data,
+          rd_data=>xmt_ram_rd_data);
+          		
+process(rst_n_tx,xmt_ram_wr_clk) is
      begin
 	    if rst_n_tx='0' then
          xmt_ram_wr_cnt<=(others=>'0');
-      elsif clk_tx'event and clk_tx='1' then
+      elsif xmt_ram_wr_clk'event and xmt_ram_wr_clk='1' then
          if xmt_ram_wr_en='1' then
 			     if xmt_ram_wr_cnt=77 then
-			         xmt_ram_wr_cnt<=(others=>'0');        
+			         xmt_ram_wr_cnt<=(others=>'0'); 
+			         en<='1';       
            else
                  xmt_ram_wr_cnt<=xmt_ram_wr_cnt+1;
+                 en<='0';
            end if;
          else
            xmt_ram_wr_cnt<=(others=>'0');
@@ -214,6 +276,24 @@ u1: plc_design PORT map
   
  xmt_ram_wr_data(31 downto 7)<=(others=>'0');
  xmt_ram_wr_data(6 downto 0)<=xmt_ram_wr_cnt;	
+ xmt_ram_wr_adr<=xmt_ram_wr_cnt;
+
+rx_rcv_ram_inst:xmt_rcv_ram   
+  GENERIC map(N=>7,W=>32)
+  PORT map( rst=>not(rst_n_tx),
+          rd_clk=>clk_tx,
+		      wr_clk=>rx_ram_wr_clk,
+          wr_en=>rx_ram_wr_en,
+		      rd_en=>rx_ram_rd_en,
+          wr_adr=>rx_ram_wr_adr,
+		      rd_adr=>rx_ram_rd_adr,
+          wr_data=>rx_ram_wr_data,
+          rd_data=>rx_ram_rd_data);	
+                  
+
+
+
+
 		
 end rtl;
 

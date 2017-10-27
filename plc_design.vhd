@@ -11,7 +11,9 @@ ENTITY plc_design IS
 		clk_tx :  IN  STD_LOGIC;
 		rst_n_tx :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		receiver_din: IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		ifft_sink_ready :  OUT  STD_LOGIC;
 		ifft_source_sop :  OUT  STD_LOGIC;
@@ -76,7 +78,12 @@ ENTITY plc_design IS
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
 		c1:out std_logic;
-		xmt_ram_wr_en:out std_logic
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END plc_design;
 
@@ -110,17 +117,25 @@ COMPONENT receiver
 		rcv_data :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		rt_i :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
-		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0)
+		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END COMPONENT;
 
 COMPONENT transfer
 	PORT
 	(
-		rst :  IN  STD_LOGIC;
+      rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -157,8 +172,7 @@ COMPONENT transfer
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic;
-		xmt_ram_wr_en:out std_logic
+		c1:out std_logic
 	);
 END COMPONENT;
 
@@ -201,14 +215,22 @@ PORT MAP(clk => clk_tx,
 		 rcv_data => rcv_data,
 		 rt_r => rt_r,
 		 rt_i => rt_i,
-		 syn_point => syn_point);
+		 syn_point => syn_point,
+		 dma_wr_en=> dma_wr_en,
+		 rx_ram_wr_data=>rx_ram_wr_data,
+		 rx_ram_wr_en=>rx_ram_wr_en,
+		 rx_ram_wr_clk=>rx_ram_wr_clk,
+		 rx_ram_wr_adr=>rx_ram_wr_adr,
+		 rx_ram_rd_triger=>rx_ram_rd_triger);
 
 
 b2v_inst1 : transfer
 PORT MAP(rst => rst_rx_syn,
 		 clk => clk_tx,
 		 en => en,
-		 xmt_ram_wr_data=>xmt_ram_wr_data,
+		 xmt_ram_rd_en=>xmt_ram_rd_en,
+		 xmt_ram_rd_adr=>xmt_ram_rd_adr,	
+		 xmt_ram_rd_data=>xmt_ram_rd_data,
 		 ram_rd_en => ram_rd_en,
 		 ram_wr_en => ram_wr_en,
 		 tx_data_valid => tx_data_valid,
@@ -245,8 +267,7 @@ PORT MAP(rst => rst_rx_syn,
 		 rom_rd_adr => rom_rd_adr,
 		 tx_data_o => tx_data_o,
 		 c0 =>c0,
-		 c1 =>c1,
-		 xmt_ram_wr_en=>xmt_ram_wr_en);
+		 c1 =>c1);
 		 
 		 
 		 

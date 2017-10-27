@@ -6,8 +6,9 @@ entity tx_ctr is
   port(rst_n: in std_logic;
        clk: in std_logic;
        en: in std_logic;
-		 --xmt_ram_wr_clk: in std_logic;
-		 xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		 xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		 xmt_ram_rd_en:out std_logic;
+		 xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
        rom_rd_en:out std_logic;
        rom_adr:out std_logic_vector(9 downto 0);
 	    cnt_o:OUT STD_LOGIC_VECTOR(14 DOWNTO 0);
@@ -15,8 +16,8 @@ entity tx_ctr is
 	    send_data_valid:out std_logic;
        ram_data_valid: out std_logic;
 	    send_data_o:out std_logic_vector(415 downto 0);
-	    pre_inverse:out std_logic;
-		 xmt_ram_wr_en_o:out std_logic);
+	    pre_inverse:out std_logic
+		 );
 end entity tx_ctr;
 
 architecture rtl of tx_ctr is
@@ -25,7 +26,7 @@ signal cnt_en1,cnt_en2,rom_rd_en_t:std_logic;
 signal tmp:std_logic_vector(9 downto 0);
 
 signal cnt:integer range 0 to 19134;
-type state_t is (s_rst,s_idle,s_ram_wr,s_tx);
+type state_t is (s_rst,s_idle,s_tx);
 signal state,next_state: state_t;
 
 type state_t1 is (s_rst,s_idle,s_rd);
@@ -33,24 +34,9 @@ signal sta,next_sta: state_t1;
 
 signal tmp_cnt:integer range 0 to 10;
 -----------------------------------------------
-signal  xmt_ram_rd_en,xmt_ram_wr_en,xmt_rd_en,xmt_rd_en_t:std_logic;
-signal  xmt_ram_wr_cnt,xmt_ram_wr_adr,xmt_ram_rd_adr,xmt_ram_rd_cnt:std_logic_vector(6 downto 0);
-signal  xmt_ram_rd_data:STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal  xmt_rd_en,xmt_rd_en_t:std_logic;
+signal  xmt_ram_rd_cnt:std_logic_vector(6 downto 0);
 signal  send_data_t,send_data:std_logic_vector(415 downto 0);
- component xmt_rcv_ram IS 
-  GENERIC(N: INTEGER:=7;
-          W: INTEGER:=32);
-  PORT( rst_n: IN STD_LOGIC;
-        rd_clk: IN STD_LOGIC;
-		    wr_clk: in std_logic;
-        wr_en:IN STD_LOGIC;
-		    rd_en: in std_logic;
-        wr_adr:IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
-		    rd_adr:IN STD_LOGIC_VECTOR(N-1 DOWNTO 0);
-        wr_data:IN STD_LOGIC_VECTOR(W-1 DOWNTO 0);
-        rd_data:OUT STD_LOGIC_VECTOR(W-1 DOWNTO 0));
-END  component xmt_rcv_ram;
-
 
 
 begin
@@ -66,7 +52,7 @@ process(rst_n,clk) is
  end process;
 
 
-  process(state,rst_n,en,cnt,xmt_ram_wr_cnt) is
+  process(state,rst_n,en,cnt) is
     begin
       case state is
         when s_rst =>
@@ -77,17 +63,10 @@ process(rst_n,clk) is
           end if;
         when s_idle =>
           if en='1' then
-             next_state<=s_ram_wr;
-          else
-             next_state<=s_idle;
-          end if;
-          
-        when s_ram_wr =>
-          if xmt_ram_wr_cnt=77 then
              next_state<=s_tx;
           else
-             next_state<=s_ram_wr;
-          end if;  
+             next_state<=s_idle;
+          end if; 
         when s_tx => 
 	       if cnt=19134 then
               next_state<=s_idle;
@@ -103,20 +82,13 @@ process(rst_n,clk) is
          case state is
            when s_rst =>
                   cnt_en1<='0';
-                  xmt_ram_wr_en<='0';
            when s_idle =>
-                  cnt_en1<='0';
-                  xmt_ram_wr_en<='0';
-           when s_ram_wr =>
-                  cnt_en1<='0';
-                  xmt_ram_wr_en<='1';       
+                  cnt_en1<='0';   
 			     when s_tx =>
-                  cnt_en1<='1';
-                  xmt_ram_wr_en<='0';                  
+                  cnt_en1<='1';               
          end case;
   end process;
   
-  xmt_ram_wr_en_o<=xmt_ram_wr_en;
   
   process(rst_n,clk) is
      begin
@@ -297,39 +269,29 @@ process(rst_n,clk) is
  xmt_ram_rd_adr<=xmt_ram_rd_cnt; 
  xmt_ram_rd_en<=xmt_rd_en;
 
- process(rst_n,clk) is
-     begin
-	    if rst_n='0' then
-         xmt_ram_wr_cnt<=(others=>'0');
-      elsif clk'event and clk='1' then
-         if xmt_ram_wr_en='1' then
-			     if xmt_ram_wr_cnt=77 then
-			         xmt_ram_wr_cnt<=(others=>'0');        
-           else
-                 xmt_ram_wr_cnt<=xmt_ram_wr_cnt+1;
-           end if;
-         else
-           xmt_ram_wr_cnt<=(others=>'0');
-        end if;
-      end if; 
-  end process;
-  
-  
- xmt_ram_wr_adr<=xmt_ram_wr_cnt;
+-- process(rst_n,xmt_ram_wr_clk) is
+--     begin
+--	    if rst_n='0' then
+--         xmt_ram_wr_cnt<=(others=>'0');
+--      elsif xmt_ram_wr_clk'event and xmt_ram_wr_clk='1' then
+--         if xmt_ram_wr_en='1' then
+--			     if xmt_ram_wr_cnt=77 then
+--			         xmt_ram_wr_cnt<=(others=>'0');        
+--           else
+--                 xmt_ram_wr_cnt<=xmt_ram_wr_cnt+1;
+--           end if;
+--         else
+--           xmt_ram_wr_cnt<=(others=>'0');
+--        end if;
+--      end if; 
+--  end process;
+--  
+--  
+-- xmt_ram_wr_adr<=xmt_ram_wr_cnt;
  --xmt_ram_wr_data(31 downto 7)<=(others=>'0');
  --xmt_ram_wr_data(6 downto 0)<=xmt_ram_wr_cnt;
  	 
-u1:xmt_rcv_ram   
-  GENERIC map(N=>7,W=>32)
-  PORT map( rst_n=>rst_n,
-          rd_clk=>clk,
-		    wr_clk=>clk,
-          wr_en=>xmt_ram_wr_en,
-		    rd_en=>xmt_ram_rd_en,
-          wr_adr=>xmt_ram_wr_adr,
-		    rd_adr=>xmt_ram_rd_adr,
-          wr_data=>xmt_ram_wr_data,
-          rd_data=>xmt_ram_rd_data);
+
 
 
  process(rst_n,clk) is

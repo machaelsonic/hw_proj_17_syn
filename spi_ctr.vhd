@@ -3,7 +3,9 @@ use ieee.std_logic_1164.all;
 
 entity spi_ctr is
    port(rst_n: in std_logic;
-        clk: in std_logic; --40M
+        clk: in std_logic; --25M
+		  cpu_9866_recfg:in std_logic;
+		  rx_gain: in std_logic_vector(5 downto 0);
         start:out std_logic;
         dout:out std_logic_vector(15 downto 0);
 		  ad_rst:out std_logic);
@@ -63,7 +65,7 @@ architecture rtl of spi_ctr is
    end process;
    
    
-   process(rst_n,state,cnt) is
+   process(rst_n,state,cnt,cnt1,cpu_9866_recfg) is
 
     begin
      case state is
@@ -88,7 +90,11 @@ architecture rtl of spi_ctr is
                next_state<=s0;
             end if;
       when s1 =>
-           next_state<=s1;       
+		     if cpu_9866_recfg='1' then
+			     next_state<=s0;
+			  else
+              next_state<=s1;
+           end if;				  
      end case;           
    end process; 
     
@@ -119,8 +125,8 @@ architecture rtl of spi_ctr is
 				cnt_en1<='0';
 				ad_rst<='1';
             if cnt<18 then
-					  dout<="0000100101001111";--R09--010101 -- rx gain --001111
-					  
+					  --dout<="0000100101001111";--R09--010101 -- rx gain --001111
+					  dout<="0000100101"&rx_gain;
             elsif cnt<37 then
 					dout<="0000011100000000";--R07
             elsif cnt<56 then

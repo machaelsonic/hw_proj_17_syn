@@ -8,13 +8,14 @@
 
 
 
-volatile  alt_u8 SendBuf[24],ReceBuf[4];
-volatile alt_u16 send_ptr;
+volatile  alt_u8 SendBuf[78],ReceBuf[4];
+volatile  alt_u8 SendBuf_long[2126];
+volatile alt_u16 send_ptr,send_ptr_long;
 volatile alt_u8 tempRece;
-volatile alt_u8 wr_flag;
-volatile alt_u32 rcv_data,send_data;
+volatile alt_u8 wr_flag,uart_long;
+volatile alt_u32  dma_data,send_data;
+volatile alt_u32 xmt_ram_wr_buf[78];
 
-alt_u32 send_data_bak = 0;
 
 volatile alt_u8 RxPtr,RxStart;
 // volatile alt_u8 m_s;
@@ -45,56 +46,6 @@ void uart_init(void)
  }
 
 
-void data_rcv_isr (void* context,alt_u32 id)
-{
-
-	/**********************************LED TEST*********************************************/
-
-	      		 	       IOWR_ALTERA_AVALON_PIO_DATA(LED_FOR_TEST_BASE, 0x01);
- /*************************************************************************************************/
-
-
-	             IOWR_ALTERA_AVALON_PIO_EDGE_CAP(DATA_IN_VALID_BASE,0x00);
-
-	             rcv_data=IORD_ALTERA_AVALON_PIO_DATA(DATA_IN_BASE);
-
-				 SendBuf[0+4*i]=(rcv_data>>24)&0xFF;
-				 SendBuf[1+4*i]=(rcv_data>>16)&0xFF;
-				 SendBuf[2+4*i]=(rcv_data>>8)&0xFF;
-				 SendBuf[3+4*i]=rcv_data&0xFF;
-
-
-
-			if (i==5)
-			{
-				 i=0;
-				 if (wr_flag==0)
-				 {
-					 wr_flag=1;
-					 IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[0]);
-					 send_ptr++;
-					 uart_init();
-				 }
-				 //IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x00);//master_salve=0;
-
-				 //if(rcv_data != send_data_bak +1)
-				 if (m_s==0)
-				 {
-					 IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x01);
-					 IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x00);
-					 IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_BASE,rcv_data+1);
-				 }
-
-
-			 }
-
-			 else
-			 {
-				 i=i+1;
-			 }
-
-			   IOWR_ALTERA_AVALON_PIO_DATA(LED_FOR_TEST_BASE, 0x00);
-}
 
 ////////////////////////////uart receive data //////////////////////////////
 
@@ -130,16 +81,13 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
 		    	{
 		    		RxPtr=0;
 		    		RxStart=0;
-		    		send_data=((ReceBuf[0]|0x00000000)<<24)|((ReceBuf[1]|0x00000000)<<16)|((ReceBuf[2]|0x00000000)<<8)|ReceBuf[3];//0x5A5A5A5A;
 		    		IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
 		    		m_s=1;
-		    		{
-		    		IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_BASE,send_data);
-		    		IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x01);
-		    		IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x00);
-		    		uart_init();
-		    		send_data_bak = send_data;
-		    		}
+		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// ½ûÖ¹CPU¶Ôram¶Á²Ù×÷
+		    		//Æô¶¯Âß¼­·¢ËÍ×´Ì¬
+		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
+		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x01);
+		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
 		    	}
 		    }
 		   }
@@ -148,24 +96,251 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
 
            if (wr_flag==1)
            {
-			 if (send_ptr<24)
-             {
-               IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[send_ptr]);
-               send_ptr++;
-                 if (send_ptr==24)
-                    {
+        	 if (uart_long==0)
+        	 {
+			   if (send_ptr<78)
+                 {
+                   IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[send_ptr]);
+                   SendBuf[send_ptr]=0;
+                   send_ptr++;
+                   if (send_ptr==78)
+                       {
                          send_ptr=0;
                          wr_flag=0;
                          IOWR_ALTERA_AVALON_UART_CONTROL(UART_BASE, 0X0080);
                          IOWR_ALTERA_AVALON_UART_STATUS(UART_BASE,0X0000);
-                    }
-              }
+                       }
+                 }
+        	 }
+        	 else if (uart_long==1)
+        	 {
+        		 if (send_ptr<2126)
+        		    {
+        		      IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf_long[send_ptr_long]);
+        		      SendBuf_long[send_ptr_long]=0;
+        		      send_ptr_long++;
+        		      if (send_ptr_long==2126)
+        		         {
+        		           send_ptr_long=0;
+        		           wr_flag=0;
+        		           IOWR_ALTERA_AVALON_UART_CONTROL(UART_BASE, 0X0080);
+        		           IOWR_ALTERA_AVALON_UART_STATUS(UART_BASE,0X0000);
+        		         }
+        		    }
+        	 }
            }
 	     }
 
 }
 
+void xmt_ram_wr (void)
+{
+        alt_u16 i,adr;
 
+        adr=0;
+        for (i=0;i<78;i++)
+            {
+        	  xmt_ram_wr_buf[i]=0;
+              IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_EN_BASE,0x01);
+              IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_ADR_BASE,adr);
+              IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_DATA_BASE,xmt_ram_wr_buf[i]);
+    		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_CLK_BASE,0);
+    		  delay(1);
+    		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_CLK_BASE,1);
+    		  delay(1);
+        	  adr++;
+            }
+
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_EN_BASE,0x00);
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_ADR_BASE,0x00);
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_CLK_BASE,0);
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_DATA_BASE,0x00);
+
+}
+
+void xmt_ram_rd (void)
+{
+        alt_u16 i,adr;
+
+        adr=0;
+
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// ÔÊÐíCPU¶Ôram¶Á²Ù×÷
+        for (i=0;i<78;i++)
+            {
+              IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_EN_BASE,0x01);
+              IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_ADR_BASE,adr);
+    		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_CLK_BASE,0);
+    		  delay(1);
+    		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_CLK_BASE,1);
+    		  delay(1);
+    		  SendBuf[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_DATA_BASE);
+    		  adr++;
+            }
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// ½ûÖ¹CPU¶Ôram¶Á²Ù×÷
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_EN_BASE,0x00);
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_ADR_BASE,0x00);
+        IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_CLK_BASE,0);
+        if (wr_flag==0)
+        	 {
+        		 wr_flag=1;
+        		 uart_long=0;
+                 IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[0]);
+                 SendBuf[0]=0;
+                 send_ptr++;
+                 uart_init();
+        	 }
+
+}
+
+void rx_ram_rd(void)
+{
+	      alt_u16 i,adr;
+	       adr=0;
+		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// ÔÊÐíCPU¶Ôram¶Á²Ù×÷
+
+		   for (i=0;i<78;i++)
+		        {
+
+		          IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_EN_BASE,0x01);
+		          IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_ADR_BASE,adr);
+		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,0);
+		     	  delay(1);
+		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,1);
+		     	  delay(1);
+		     	  SendBuf[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+			      adr++;
+	            }
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// ½ûÖ¹CPU¶Ôram¶Á²Ù×÷
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_EN_BASE,0x00);
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_ADR_BASE,0x00);
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,0);
+		         if (wr_flag==0)
+		         	 {
+		         		  wr_flag=1;
+		         		  uart_long=0;
+		                  IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[0]);
+		                  SendBuf[0]=0;
+		                  send_ptr++;
+		                  uart_init();
+		         	 }
+
+}
+void rx_data_rd(void)
+{
+	      alt_u16 i,adr;
+	       adr=0;
+		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// ÔÊÐíCPU¶Ôram¶Á²Ù×÷
+
+		   for (i=0;i<78;i++)
+		        {
+
+		          IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_EN_BASE,0x01);
+		          IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_ADR_BASE,adr);
+		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,0);
+		     	  delay(1);
+		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,1);
+		     	  delay(1);
+		     	  SendBuf_long[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+			      adr++;
+	            }
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// ½ûÖ¹CPU¶Ôram¶Á²Ù×÷
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_EN_BASE,0x00);
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_ADR_BASE,0x00);
+		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,0);
+
+		         adr=0;
+		     for (i=0;i<1024;i++)
+		          {
+		            adr++;
+		            IOWR_ALTERA_AVALON_PIO_DATA(RD_ADR_BASE,adr);
+		         	IOWR_ALTERA_AVALON_PIO_DATA(RD_CLK_BASE,0);
+		            delay(1);
+		         	IOWR_ALTERA_AVALON_PIO_DATA(RD_CLK_BASE,1);
+		         	delay(1);
+		         	dma_data=IORD_ALTERA_AVALON_PIO_DATA(RCV_RAM_DATA_BASE);
+		         	SendBuf_long[2*i+78]=(dma_data>>8)&0xFF;
+		         	SendBuf_long[2*i+1+78]=dma_data&0xFF;
+		          }
+
+		         if (wr_flag==0)
+		         	 {
+		         		  wr_flag=1;
+		         		  uart_long=1;
+		                  IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf_long[0]);
+		                  SendBuf_long[0]=1;
+		                  send_ptr_long++;
+		                  uart_init();
+		         	 }
+
+}
+
+
+void config_9866(void)
+{
+	delay(10);
+	IOWR_ALTERA_AVALON_PIO_DATA(RX_GAIN_BASE,0x0F);
+	IOWR_ALTERA_AVALON_PIO_DATA(CPU_9866_RECFG_BASE,0x00);
+	IOWR_ALTERA_AVALON_PIO_DATA(CPU_9866_RECFG_BASE,0x01);
+	IOWR_ALTERA_AVALON_PIO_DATA(CPU_9866_RECFG_BASE,0x00);
+
+}
+
+void rcv_ram_rd(void)
+{
+	             alt_u16 i,adr;
+
+	             adr=0;
+                 for (i=0;i<1024;i++)
+                 {
+                	 adr++;
+                	 IOWR_ALTERA_AVALON_PIO_DATA(RD_ADR_BASE,adr);
+		             IOWR_ALTERA_AVALON_PIO_DATA(RD_CLK_BASE,0);
+		             delay(1);
+		             IOWR_ALTERA_AVALON_PIO_DATA(RD_CLK_BASE,1);
+		             delay(1);
+		             dma_data=IORD_ALTERA_AVALON_PIO_DATA(RCV_RAM_DATA_BASE);
+		             SendBuf_long[2*i]=(dma_data>>8)&0xFF;
+		             SendBuf_long[2*i+1]=dma_data&0xFF;
+                 }
+
+			  	 if ((wr_flag==0))
+		 	      {
+		 	   	    wr_flag=1;
+		 	   	    uart_long=1;
+		 	    	IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf_long[0]);
+		 	    	SendBuf_long[0]=0;
+		 	    	send_ptr_long++;
+		 	    	uart_init();
+		 	      }
+
+
+
+
+}
+
+void data_rcv_isr (void* context,alt_u32 id)
+{
+
+
+	IOWR_ALTERA_AVALON_PIO_EDGE_CAP(CPU_RX_RAM_RD_TRIGER_BASE,0x00);
+	/**********************************LED TEST*********************************************/
+
+	 IOWR_ALTERA_AVALON_PIO_DATA(LED_FOR_TEST_BASE, 0x01);
+    /*************************************************************************************************/
+
+	     rx_data_rd();
+
+
+	         if (m_s==0)
+	         {
+	        	 //Æô¶¯Âß¼­·¢ËÍ×´Ì¬
+	        	IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
+	        	IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x01);
+	        	IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
+
+	         }
+
+}
 
 
 int main (void)
@@ -183,21 +358,20 @@ int main (void)
  m_s=0;
 
 
- alt_irq_register(DATA_IN_VALID_IRQ, (void*)&pio_iq_capture, data_rcv_isr);
+ alt_irq_register(CPU_RX_RAM_RD_TRIGER_IRQ, (void*)&pio_iq_capture, data_rcv_isr);
 
  alt_irq_register(UART_IRQ, (void*)&uart_iq_capture, uart_rx_tx_isr);
 
 
     IOWR_ALTERA_AVALON_PIO_DATA(LED_FOR_TEST_BASE, 0x00);
-    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(DATA_IN_VALID_BASE,0xFF);
-    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(DATA_IN_VALID_BASE,0x00);
-
-    uart_init();
+    IOWR_ALTERA_AVALON_PIO_IRQ_MASK(CPU_RX_RAM_RD_TRIGER_BASE,0xFF);
+    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(CPU_RX_RAM_RD_TRIGER_BASE,0x00);
 
 
-
-
-    IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_VALID_BASE,0x00);
+	xmt_ram_wr();//Ð´XMT ram
+    xmt_ram_rd();
+    config_9866();
+    //uart_init();
 
 
 
@@ -226,7 +400,7 @@ while(1)
 		    }
 		 }
 
- */
+*/
 
  }
 return 0;

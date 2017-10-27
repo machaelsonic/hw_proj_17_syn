@@ -37,7 +37,12 @@ ENTITY rx IS
 		rcv_data_valid :  OUT  STD_LOGIC;
 		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		rcv_data_delay:out std_logic_vector(11 downto 0);
-		dma_wr_en:out std_logic
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END rx;
 
@@ -72,7 +77,12 @@ COMPONENT receiver
 		rt_i :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		dma_wr_en:out std_logic
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END COMPONENT;
 
@@ -146,7 +156,13 @@ PORT MAP(rst => rst_rx_syn,
 		 demap_sink_valid => demap_sink_valid_t,
 		 demap_dout => demap_dout,
 		 rcv_data=> rcv_data_delay,
-		 dma_wr_en=> dma_wr_en);
+		 dma_wr_en=> dma_wr_en,
+		 rx_ram_wr_data=>rx_ram_wr_data,
+		 rx_ram_wr_en=>rx_ram_wr_en,
+		 rx_ram_wr_clk=>rx_ram_wr_clk,
+		 rx_ram_wr_adr=>rx_ram_wr_adr,
+		 rx_ram_rd_triger=>rx_ram_rd_triger
+		 );
 
 rcv_data_valid<=demap_sink_valid_t;
 END bdf_type;

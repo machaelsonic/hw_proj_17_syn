@@ -26,14 +26,15 @@ ENTITY tx IS
 	(
 		rst_syn :  IN  STD_LOGIC;
 		clk_20M :  IN  STD_LOGIC;
-		tx_triger: in std_logic;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		tx_en: in std_logic;
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		ISL_C1 :  OUT  STD_LOGIC;
 		ISL_C0 :  OUT  STD_LOGIC;
 		tx_cnt:OUT  STD_LOGIC_VECTOR(14 DOWNTO 0);
 		tx_data_valid :  OUT  STD_LOGIC;
-		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
-		xmt_ram_wr_en:out std_logic
+		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0)
 	);
 END tx;
 
@@ -45,7 +46,9 @@ COMPONENT transfer
 		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -82,8 +85,7 @@ COMPONENT transfer
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic;
-		xmt_ram_wr_en:out std_logic
+		c1:out std_logic
 	);
 END COMPONENT;
 
@@ -113,19 +115,20 @@ b2v_inst1 : transfer
 PORT MAP(rst => rst_syn,
 		 clk => clk_20M,
 		 en => en,
-		 xmt_ram_wr_data=>xmt_ram_wr_data,
+		 xmt_ram_rd_en=>xmt_ram_rd_en,
+		 xmt_ram_rd_adr=>xmt_ram_rd_adr,	
+		 xmt_ram_rd_data=>xmt_ram_rd_data,		 
 		 tx_data_valid => tx_data_valid,
 		 c0 => c0,
 		 c1 => c1,
 		 cnt =>tx_cnt,
-		 tx_data_o => tx_data_o,
-		 xmt_ram_wr_en=>xmt_ram_wr_en);
+		 tx_data_o => tx_data_o);
 
 
 b2v_inst2 : rx_to_tx
 PORT MAP(rst_n => rst_n_tx_syn,
 		 clk => clk_20M,
-		 rcv_data_valid => tx_triger,
+		 rcv_data_valid => tx_en,
 		 en => en);
 
 ISL_C1 <= c1;

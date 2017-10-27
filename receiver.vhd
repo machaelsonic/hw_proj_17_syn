@@ -50,7 +50,12 @@ ENTITY receiver IS
 		rt_i :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
-		dma_wr_en:out std_logic
+		dma_wr_en:out std_logic;
+		rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		rx_ram_wr_en:out std_logic;
+		rx_ram_wr_clk:out std_logic;
+		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		rx_ram_rd_triger:out std_logic
 	);
 END receiver;
 
@@ -149,6 +154,21 @@ GENERIC (N : INTEGER);
          sink_valid: out std_logic;
          dout:out std_logic_vector(415 downto 0));
 END COMPONENT;
+
+
+component rx_ram_ctr is
+  port(rst_n: in std_logic;
+       clk: in std_logic;
+	    din:in std_logic_vector(415 downto 0);
+		 din_valid: in std_logic;
+	    rx_ram_wr_data:out std_logic_vector(31 downto 0);
+		 rx_ram_wr_en:out std_logic;
+		 rx_ram_wr_clk:out std_logic;
+		 rx_ram_wr_adr:out std_logic_vector(6 downto 0);
+		 rx_ram_rd_triger:out std_logic
+		 );
+end component rx_ram_ctr;
+
 --
 SIGNAL	fft_source_imag_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 SIGNAL	fft_source_real_t:  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -300,4 +320,17 @@ PORT MAP(rst_n => rst_n,
    demap_sink_valid<=demap_sink_v;
    demap_dout<=demap_d;
    
+rx_ram_ctr_inst: rx_ram_ctr 
+  port map (rst_n=>rst_n,
+            clk =>clk,
+	         din=>demap_d,
+		      din_valid=>demap_sink_v,
+	         rx_ram_wr_data=>rx_ram_wr_data,
+		      rx_ram_wr_en=>rx_ram_wr_en,
+		      rx_ram_wr_clk=>rx_ram_wr_clk,
+		      rx_ram_wr_adr=>rx_ram_wr_adr,
+				rx_ram_rd_triger=>rx_ram_rd_triger
+		 );
+	
+	
 END bdf_type;

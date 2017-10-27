@@ -28,7 +28,9 @@ ENTITY transfer IS
 		rst :  IN  STD_LOGIC;
 		clk :  IN  STD_LOGIC;
 		en :  IN  STD_LOGIC;
-		xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		xmt_ram_rd_en:out std_logic;
+		xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
 		ram_rd_en :  OUT  STD_LOGIC;
 		ram_wr_en :  OUT  STD_LOGIC;
 		tx_data_valid :  OUT  STD_LOGIC;
@@ -65,8 +67,7 @@ ENTITY transfer IS
 		rom_rd_adr :  OUT  STD_LOGIC_VECTOR(9 DOWNTO 0);
 		tx_data_o :  OUT  STD_LOGIC_VECTOR(11 DOWNTO 0);
 		c0:out std_logic;
-		c1:out std_logic;
-		xmt_ram_wr_en:out std_logic
+		c1:out std_logic
 	);
 END transfer;
 
@@ -159,10 +160,12 @@ COMPONENT tx_data
 END COMPONENT;
 
 COMPONENT tx_ctr
-	 port(rst_n: in std_logic;
+  port(rst_n: in std_logic;
        clk: in std_logic;
        en: in std_logic;
-		 xmt_ram_wr_data: in std_logic_vector(31 downto 0);
+		 xmt_ram_rd_data:in STD_LOGIC_VECTOR(31 DOWNTO 0);
+		 xmt_ram_rd_en:out std_logic;
+		 xmt_ram_rd_adr:out STD_LOGIC_VECTOR(6 DOWNTO 0);
        rom_rd_en:out std_logic;
        rom_adr:out std_logic_vector(9 downto 0);
 	    cnt_o:OUT STD_LOGIC_VECTOR(14 DOWNTO 0);
@@ -170,9 +173,8 @@ COMPONENT tx_ctr
 	    send_data_valid:out std_logic;
        ram_data_valid: out std_logic;
 	    send_data_o:out std_logic_vector(415 downto 0);
-	    pre_inverse:out std_logic;
-		 xmt_ram_wr_en_o:out std_logic
-	);
+	    pre_inverse:out std_logic
+		 );
 END COMPONENT;
 
 
@@ -377,7 +379,9 @@ b2v_inst5 : tx_ctr
 PORT MAP(rst_n => rst_n,
 		 clk => clk,
 		 en => en_delay_8,
-		 xmt_ram_wr_data=>xmt_ram_wr_data,
+		 xmt_ram_rd_en=>xmt_ram_rd_en,
+		 xmt_ram_rd_adr=>xmt_ram_rd_adr,	
+		 xmt_ram_rd_data=>xmt_ram_rd_data,		  
 		 rom_rd_en => rom_rd_en_t,
 		 frame_flag =>frame_flag,
 		 send_data_valid => send_data_valid_t,
@@ -385,8 +389,6 @@ PORT MAP(rst_n => rst_n,
 		 rom_adr => rom_rd_adr_t,
 		 cnt_o => state_cnt,
 		 send_data_o=> tx_ctr_do_t,
-		 pre_inverse =>pre_inverse_t,
-		 xmt_ram_wr_en_o=>xmt_ram_wr_en);
+		 pre_inverse =>pre_inverse_t);
 		  
- 
 END bdf_type;
