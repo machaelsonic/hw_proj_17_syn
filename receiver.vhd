@@ -51,6 +51,10 @@ ENTITY receiver IS
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		dma_wr_en:out std_logic;
+		rcv_isr_syn_start:out std_logic;
+		rcv_isr_syn_err:out std_logic;
+		rcv_isr_syn_true:out std_logic;
+		rcv_isr_demap_end:out std_logic;
 		rx_ram_wr_data:out std_logic_vector(31 downto 0);
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
@@ -82,7 +86,11 @@ COMPONENT fft_ctr is
        sink_eop:out std_logic;
        payload_data_valid:out std_logic;
 		 reg_flush:out std_logic;
-		 dma_wr_en:out std_logic);
+		 dma_wr_en:out std_logic;
+		 rcv_isr_syn_start:out std_logic;
+		 rcv_isr_syn_err:out std_logic;
+		 rcv_isr_syn_true:out std_logic;
+		 rcv_isr_demap_end:out std_logic);
 end COMPONENT fft_ctr;
 
 COMPONENT mult_complex_ip
@@ -214,10 +222,15 @@ b2v_fft_ctr: fft_ctr
 		 cnt_o=>cnt_o,
 		 fft_data_valid =>fft_data_valid_t,
 		 sink_sop => sink_sop_t,
-     sink_eop =>sink_eop_t,
-     payload_data_valid =>payload_data_valid,
-	  reg_flush=>reg_flush,
-	  dma_wr_en=> dma_wr_en);
+       sink_eop =>sink_eop_t,
+       payload_data_valid =>payload_data_valid,
+	    reg_flush=>reg_flush,
+	    dma_wr_en=> dma_wr_en,
+	  	 rcv_isr_syn_start=>rcv_isr_syn_start,
+		 rcv_isr_syn_err=>rcv_isr_syn_err,
+		 rcv_isr_syn_true=>rcv_isr_syn_true,
+		 rcv_isr_demap_end=>rcv_isr_demap_end
+	  );
 
 
 

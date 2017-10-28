@@ -178,7 +178,12 @@ add wave -noupdate /tb_plc_design/rx_ram_rd_triger
 add wave -noupdate -radix unsigned /tb_plc_design/rx_rcv_ram_inst/mem
 add wave -noupdate /tb_plc_design/rx_rcv_ram_inst/wr_adr_int
 add wave -noupdate /tb_plc_design/rx_rcv_ram_inst/rd_adr_int
-add wave -noupdate -divider rx_ram_ctr
+add wave -noupdate -divider <NULL>
+add wave -noupdate /tb_plc_design/u1/timer_cnt
+add wave -noupdate /tb_plc_design/reg_demap_end_time
+add wave -noupdate /tb_plc_design/reg_syn_err_time
+add wave -noupdate /tb_plc_design/reg_syn_start_time
+add wave -noupdate /tb_plc_design/reg_syn_true_time
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {307533616 ps} 0}
 quietly wave cursor active 1
@@ -196,4 +201,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {418488 ns}
+WaveRestoreZoom {26460400 ps} {51828400 ps}

@@ -8,23 +8,20 @@
 
 
 
-volatile  alt_u8 SendBuf[78],ReceBuf[4];
-volatile  alt_u8 SendBuf_long[2126];
+volatile  alt_u8 SendBuf[312],ReceBuf[4];
+volatile  alt_u8 SendBuf_long[2380];
 volatile alt_u16 send_ptr,send_ptr_long;
 volatile alt_u8 tempRece;
 volatile alt_u8 wr_flag,uart_long;
-volatile alt_u32  dma_data,send_data;
+volatile alt_u16  dma_data;
 volatile alt_u32 xmt_ram_wr_buf[78];
 
 
 volatile alt_u8 RxPtr,RxStart;
-// volatile alt_u8 m_s;
-//volatile int  uart_iq_capture;
-//volatile int pio_iq_capture;
+
 alt_u32 cnt;
 alt_u8 i,m_s;
 
-//alt_u8 rcv_bank[6];
 
 void delay(unsigned int i)
 {
@@ -98,12 +95,12 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
            {
         	 if (uart_long==0)
         	 {
-			   if (send_ptr<78)
+			   if (send_ptr<312)
                  {
                    IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf[send_ptr]);
                    SendBuf[send_ptr]=0;
                    send_ptr++;
-                   if (send_ptr==78)
+                   if (send_ptr==312)
                        {
                          send_ptr=0;
                          wr_flag=0;
@@ -114,12 +111,12 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
         	 }
         	 else if (uart_long==1)
         	 {
-        		 if (send_ptr<2126)
+        		 if (send_ptr<2380)
         		    {
         		      IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, SendBuf_long[send_ptr_long]);
         		      SendBuf_long[send_ptr_long]=0;
         		      send_ptr_long++;
-        		      if (send_ptr_long==2126)
+        		      if (send_ptr_long==2380)
         		         {
         		           send_ptr_long=0;
         		           wr_flag=0;
@@ -140,7 +137,7 @@ void xmt_ram_wr (void)
         adr=0;
         for (i=0;i<78;i++)
             {
-        	  xmt_ram_wr_buf[i]=0;
+        	  xmt_ram_wr_buf[i]=i+1;
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_EN_BASE,0x01);
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_ADR_BASE,adr);
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_DATA_BASE,xmt_ram_wr_buf[i]);
@@ -161,7 +158,7 @@ void xmt_ram_wr (void)
 void xmt_ram_rd (void)
 {
         alt_u16 i,adr;
-
+        alt_u32 rd_data;
         adr=0;
 
         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// 允许CPU对ram读操作
@@ -173,7 +170,11 @@ void xmt_ram_rd (void)
     		  delay(1);
     		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_CLK_BASE,1);
     		  delay(1);
-    		  SendBuf[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_DATA_BASE);
+    		  rd_data=IORD_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_RD_DATA_BASE);
+    		  SendBuf[4*i]=(rd_data>>24)&0xFF;
+    		  SendBuf[4*i+1]=(rd_data>>16)&0xFF;
+    		  SendBuf[4*i+2]=(rd_data>>8)&0xFF;
+    		  SendBuf[4*i+3]=rd_data&0xFF;
     		  adr++;
             }
         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// 禁止CPU对ram读操作
@@ -191,10 +192,11 @@ void xmt_ram_rd (void)
         	 }
 
 }
-
+/*
 void rx_ram_rd(void)
 {
 	      alt_u16 i,adr;
+	      alt_u32 rd_data;
 	       adr=0;
 		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// 允许CPU对ram读操作
 
@@ -207,7 +209,11 @@ void rx_ram_rd(void)
 		     	  delay(1);
 		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,1);
 		     	  delay(1);
-		     	  SendBuf[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+		     	  rd_data=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+		     	  SendBuf[4*i]=(rd_data>>24)&0xFF;
+		     	  SendBuf[4*i+1]=(rd_data>>16)&0xFF;
+		     	  SendBuf[4*i+2]=(rd_data>>8)&0xFF;
+		     	  SendBuf[4*i+3]=rd_data&0xFF;
 			      adr++;
 	            }
 		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// 禁止CPU对ram读操作
@@ -225,9 +231,12 @@ void rx_ram_rd(void)
 		         	 }
 
 }
+
+*/
 void rx_data_rd(void)
 {
 	      alt_u16 i,adr;
+	      alt_u32 rd_data;
 	       adr=0;
 		  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x01);// 允许CPU对ram读操作
 
@@ -240,7 +249,11 @@ void rx_data_rd(void)
 		     	  delay(1);
 		     	  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_CLK_BASE,1);
 		     	  delay(1);
-		     	  SendBuf_long[i]=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+		     	  rd_data=IORD_ALTERA_AVALON_PIO_DATA(CPU_RX_RAM_RD_DATA_BASE);
+		     	  SendBuf_long[4*i]=(rd_data>>24)&0xFF;
+		     	  SendBuf_long[4*i+1]=(rd_data>>16)&0xFF;
+		     	  SendBuf_long[4*i+2]=(rd_data>>8)&0xFF;
+		     	  SendBuf_long[4*i+3]=rd_data&0xFF;
 			      adr++;
 	            }
 		         IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// 禁止CPU对ram读操作
@@ -258,9 +271,36 @@ void rx_data_rd(void)
 		         	IOWR_ALTERA_AVALON_PIO_DATA(RD_CLK_BASE,1);
 		         	delay(1);
 		         	dma_data=IORD_ALTERA_AVALON_PIO_DATA(RCV_RAM_DATA_BASE);
-		         	SendBuf_long[2*i+78]=(dma_data>>8)&0xFF;
-		         	SendBuf_long[2*i+1+78]=dma_data&0xFF;
+		         	SendBuf_long[2*i+312]=(dma_data>>8)&0xFF;
+		         	SendBuf_long[2*i+313]=dma_data&0xFF;
 		          }
+
+		         rd_data=IORD_ALTERA_AVALON_PIO_DATA(REG_TX_END_TIME_BASE);
+		         SendBuf_long[2360]=(rd_data>>24)&0xFF;
+		         SendBuf_long[2361]=(rd_data>>16)&0xFF;
+		         SendBuf_long[2362]=(rd_data>>8)&0xFF;
+		         SendBuf_long[2363]=rd_data&0xFF;
+		         rd_data=IORD_ALTERA_AVALON_PIO_DATA(REG_SYN_START_TIME_BASE);
+		         SendBuf_long[2364]=(rd_data>>24)&0xFF;
+		         SendBuf_long[2365]=(rd_data>>16)&0xFF;
+		         SendBuf_long[2366]=(rd_data>>8)&0xFF;
+		         SendBuf_long[2367]=rd_data&0xFF;
+		         rd_data=IORD_ALTERA_AVALON_PIO_DATA(REG_SYN_ERR_TIME_BASE);
+		         SendBuf_long[2368]=(rd_data>>24)&0xFF;
+		         SendBuf_long[2369]=(rd_data>>16)&0xFF;
+		         SendBuf_long[2370]=(rd_data>>8)&0xFF;
+		         SendBuf_long[2371]=rd_data&0xFF;
+		         rd_data=IORD_ALTERA_AVALON_PIO_DATA(REG_SYN_TRUE_TIME_BASE);
+		         SendBuf_long[2372]=(rd_data>>24)&0xFF;
+		         SendBuf_long[2373]=(rd_data>>16)&0xFF;
+		         SendBuf_long[2374]=(rd_data>>8)&0xFF;
+		         SendBuf_long[2375]=rd_data&0xFF;
+		         rd_data=IORD_ALTERA_AVALON_PIO_DATA(REG_DEMAP_END_TIME_BASE);
+		         SendBuf_long[2376]=(rd_data>>24)&0xFF;
+		         SendBuf_long[2377]=(rd_data>>16)&0xFF;
+		         SendBuf_long[2378]=(rd_data>>8)&0xFF;
+		         SendBuf_long[2379]=rd_data&0xFF;
+
 
 		         if (wr_flag==0)
 		         	 {
@@ -284,7 +324,7 @@ void config_9866(void)
 	IOWR_ALTERA_AVALON_PIO_DATA(CPU_9866_RECFG_BASE,0x00);
 
 }
-
+/*
 void rcv_ram_rd(void)
 {
 	             alt_u16 i,adr;
@@ -317,7 +357,7 @@ void rcv_ram_rd(void)
 
 
 }
-
+*/
 void data_rcv_isr (void* context,alt_u32 id)
 {
 

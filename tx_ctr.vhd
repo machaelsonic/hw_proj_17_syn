@@ -325,6 +325,5 @@ process(rst_n,send_data) is
       send_data_o<=send_data;
    end if;
 end process;
-
-
+		  
 end architecture rtl;

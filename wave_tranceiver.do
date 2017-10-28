@@ -178,8 +178,15 @@ add wave -noupdate /tb_tranceiver/cpu_wr_en
 add wave -noupdate /tb_tranceiver/cpu_rx_ram_rd_triger
 add wave -noupdate /tb_tranceiver/state
 add wave -noupdate /tb_tranceiver/next_state
+add wave -noupdate -divider timer
+add wave -noupdate -radix unsigned /tb_tranceiver/u1/timer_cnt
+add wave -noupdate -radix unsigned /tb_tranceiver/reg_demap_end_time
+add wave -noupdate -radix unsigned /tb_tranceiver/reg_syn_err_time
+add wave -noupdate -radix unsigned /tb_tranceiver/reg_syn_start_time
+add wave -noupdate -radix unsigned /tb_tranceiver/reg_syn_true_time
+add wave -noupdate -radix unsigned /tb_tranceiver/u1/reg_tx_end_time
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {2576787862 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1956138148 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 368
 configure wave -valuecolwidth 40
@@ -195,4 +202,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {3005100 ns}
+WaveRestoreZoom {307214600 ps} {2068946600 ps}

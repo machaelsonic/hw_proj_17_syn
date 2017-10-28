@@ -86,7 +86,12 @@ component plc_design
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
 		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
-		rx_ram_rd_triger:out std_logic
+		rx_ram_rd_triger:out std_logic;
+		reg_tx_end_time:out std_logic_vector(31 downto 0);
+		reg_syn_start_time:out std_logic_vector(31 downto 0);
+		reg_syn_err_time:out std_logic_vector(31 downto 0);
+		reg_syn_true_time:out std_logic_vector(31 downto 0);
+	  reg_demap_end_time:out std_logic_vector(31 downto 0)
 	);
 END component plc_design;
 
@@ -123,6 +128,8 @@ signal rx_ram_wr_data: std_logic_vector(31 downto 0);
 signal rx_ram_wr_en,rx_ram_wr_clk: std_logic;
 signal rx_ram_wr_adr:std_logic_vector(6 downto 0);
 signal rx_ram_rd_data: STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal reg_syn_start_time,reg_syn_err_time,reg_syn_true_time,reg_demap_end_time: std_logic_vector(31 downto 0);	 
+		 
 begin
 
 
@@ -198,7 +205,11 @@ u1: plc_design PORT map
 		 rx_ram_wr_en=>rx_ram_wr_en,
 		 rx_ram_wr_clk=>rx_ram_wr_clk,
 		 rx_ram_wr_adr=>rx_ram_wr_adr,
-	   rx_ram_rd_triger=>rx_ram_rd_triger
+	   rx_ram_rd_triger=>rx_ram_rd_triger,
+	   reg_syn_start_time=>reg_syn_start_time,
+	   reg_syn_err_time=>reg_syn_err_time,
+	   reg_syn_true_time=>reg_syn_true_time,
+	   reg_demap_end_time=>reg_demap_end_time	   	   
 		);
 		
 		receiver_din<=tx_data_o_t;

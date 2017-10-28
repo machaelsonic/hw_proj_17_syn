@@ -13,7 +13,11 @@ entity fft_ctr is
        sink_eop:out std_logic;
        payload_data_valid:out std_logic;
 		 reg_flush:out std_logic;
-		 dma_wr_en:out std_logic);
+		 dma_wr_en:out std_logic;
+		 rcv_isr_syn_start:out std_logic;
+		 rcv_isr_syn_err:out std_logic;
+		 rcv_isr_syn_true:out std_logic;
+		 rcv_isr_demap_end:out std_logic);
 end entity fft_ctr;
 
 architecture rtl of fft_ctr is
@@ -108,6 +112,10 @@ end process;
 			s_fft_cnt<=0;
 			dma_wr_en<='0';
 			reg_flush<='0';
+			rcv_isr_syn_start<='0';
+			rcv_isr_syn_err<='0';
+			rcv_isr_syn_true<='0';
+			rcv_isr_demap_end<='0';
       elsif clk'event and clk='1' then
         case state is
           when s_idle => 
@@ -117,23 +125,31 @@ end process;
 			       s_find_timeout_cnt<=0;
 			       s_fft_cnt<=0;
 					 reg_flush<='0';
+					 rcv_isr_demap_end<='0';
 					 if (signed(dout2_reg)> signed(dout1_reg)) then --and (dout1>=327680) then
 					    if s_idle_cnt=num then
 					      s_idle_cnt<=0;
+							rcv_isr_syn_start<='1';
 						 else
 						   s_idle_cnt<=s_idle_cnt+1;
+							rcv_isr_syn_start<='0';
 						 end if;
 					 else
 					   s_idle_cnt<=0;
+						rcv_isr_syn_start<='0';
 					 end if;
           when  s_rcv =>
+			        
 			        s_idle_cnt<=0;
+					  rcv_isr_syn_start<='0';
 					    if s_rcv_timeout_cnt=15000 then
 				          s_rcv_timeout_cnt<=0;
 							 dma_wr_en<='0';
 							 reg_flush<='1';
+							 rcv_isr_syn_err<='1';
 				       else
 						    reg_flush<='0';
+							 rcv_isr_syn_err<='0';
                       s_rcv_timeout_cnt<=s_rcv_timeout_cnt+1;
 							 if s_rcv_timeout_cnt>=2048 and s_rcv_timeout_cnt<=3071 then
 							    dma_wr_en<='1';
@@ -156,6 +172,7 @@ end process;
           when  s_find =>
               s_rcv_cnt<=0;
 				  s_rcv_timeout_cnt<=0;
+				  rcv_isr_syn_err<='0';
 				  if s_find_timeout_cnt=2000 then
 				     s_find_timeout_cnt<=0;
 					  reg_flush<='1';
@@ -167,23 +184,32 @@ end process;
             if  signed(dout2)>signed(min_frame_syn) then
                  if s_find_cnt=500 then
                     s_find_cnt<=0;
+						  rcv_isr_syn_true<='1';
                  else
                     s_find_cnt<=s_find_cnt+1;
+						  rcv_isr_syn_true<='0';
                  end if;
              else
                  min_frame_syn<=dout2;
                  s_find_cnt<=0;
+					  rcv_isr_syn_true<='0';
              end if;
           when s_fft =>
               s_find_cnt<=0;
 				  s_find_timeout_cnt<=0;
-				  
+				  rcv_isr_syn_true<='0';
              if s_fft_cnt=12544-win_offset  then
                  s_fft_cnt<=0;
 					  reg_flush<='1';
+					  rcv_isr_demap_end<='0';
              else
                  s_fft_cnt<=s_fft_cnt+1;
 					  reg_flush<='0';
+					  if s_fft_cnt=11968 then
+					     rcv_isr_demap_end<='1';
+					  else
+					     rcv_isr_demap_end<='0';
+					  end if;
             end if;
           when others => null; 
         end case;

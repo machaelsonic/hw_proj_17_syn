@@ -38,6 +38,10 @@ ENTITY rx IS
 		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		rcv_data_delay:out std_logic_vector(11 downto 0);
 		dma_wr_en:out std_logic;
+		rcv_isr_syn_start:out std_logic;
+		rcv_isr_syn_err:out std_logic;
+		rcv_isr_syn_true:out std_logic;
+		rcv_isr_demap_end:out std_logic;
 		rx_ram_wr_data:out std_logic_vector(31 downto 0);
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
@@ -78,6 +82,10 @@ COMPONENT receiver
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		dma_wr_en:out std_logic;
+		rcv_isr_syn_start:out std_logic;
+		rcv_isr_syn_err:out std_logic;
+		rcv_isr_syn_true:out std_logic;
+		rcv_isr_demap_end:out std_logic;
 		rx_ram_wr_data:out std_logic_vector(31 downto 0);
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
@@ -157,6 +165,10 @@ PORT MAP(rst => rst_rx_syn,
 		 demap_dout => demap_dout,
 		 rcv_data=> rcv_data_delay,
 		 dma_wr_en=> dma_wr_en,
+		 rcv_isr_syn_start=>rcv_isr_syn_start,
+		 rcv_isr_syn_err=>rcv_isr_syn_err,
+		 rcv_isr_syn_true=>rcv_isr_syn_true,
+		 rcv_isr_demap_end=>rcv_isr_demap_end,
 		 rx_ram_wr_data=>rx_ram_wr_data,
 		 rx_ram_wr_en=>rx_ram_wr_en,
 		 rx_ram_wr_clk=>rx_ram_wr_clk,

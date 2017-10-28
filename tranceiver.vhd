@@ -33,7 +33,12 @@ entity tranceiver is
 		   rx_en:out std_logic;
 		   
 			rcv_data_delay:out std_logic_vector(11 downto 0);
-			dma_wr_en:out std_logic
+			dma_wr_en:out std_logic;
+			reg_tx_end_time:out std_logic_vector(31 downto 0);
+			reg_syn_start_time:out std_logic_vector(31 downto 0);
+			reg_syn_err_time:out std_logic_vector(31 downto 0);
+		   reg_syn_true_time:out std_logic_vector(31 downto 0);
+	      reg_demap_end_time:out std_logic_vector(31 downto 0)
 			);
 end entity tranceiver;
 architecture rtl of tranceiver is
@@ -72,6 +77,10 @@ component rx IS
 		demap_dout :  OUT  STD_LOGIC_VECTOR(415 DOWNTO 0);
 		rcv_data_delay:out std_logic_vector(11 downto 0);
 		dma_wr_en:out std_logic;
+		rcv_isr_syn_start:out std_logic;
+		rcv_isr_syn_err:out std_logic;
+		rcv_isr_syn_true:out std_logic;
+		rcv_isr_demap_end:out std_logic;
 		rx_ram_wr_data:out std_logic_vector(31 downto 0);
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
@@ -103,6 +112,12 @@ component xmt_rcv_ram IS
         wr_data:IN STD_LOGIC_VECTOR(W-1 DOWNTO 0);
         rd_data:OUT STD_LOGIC_VECTOR(W-1 DOWNTO 0));
 END component xmt_rcv_ram;
+
+component timer_32 is
+   port( rst: in std_logic;
+         clk: in std_logic;
+			dout:out std_logic_vector(31 downto 0));
+end component timer_32;
 
 
 signal tx_data_valid_t:std_logic;
@@ -143,7 +158,8 @@ signal ram_rd_data: std_logic_vector(31 downto 0);
 signal rx_ram_rd_triger:std_logic;
 
 signal cpu_rx_data_valid:std_logic;
-
+signal timer_cnt: std_logic_vector(31 downto 0);
+signal rcv_isr_syn_start,rcv_isr_syn_err,rcv_isr_syn_true,rcv_isr_demap_end:std_logic;
 
 begin
 
@@ -279,6 +295,10 @@ rx_inst: rx
 		demap_dout => cpu_rx_data_t,
 		rcv_data_delay=>rcv_data_delay,
 		dma_wr_en=> dma_wr_en,
+		rcv_isr_syn_start=>rcv_isr_syn_start,
+		rcv_isr_syn_err=>rcv_isr_syn_err,
+		rcv_isr_syn_true=>rcv_isr_syn_true,
+		rcv_isr_demap_end=>rcv_isr_demap_end,
 		rx_ram_wr_data=>rx_ram_wr_data,
 		rx_ram_wr_en=>rx_ram_wr_en,
 		rx_ram_wr_clk=>rx_ram_wr_clk,
@@ -379,8 +399,38 @@ process(rst,m_s,clk,ram_rd_en,ram_rd_adr,xmt_ram_rd_data,cpu_rd_ram,cpu_xmt_ram_
   xmt_ram_wr_adr<=cpu_xmt_ram_wr_adr;
   xmt_ram_wr_data<=cpu_xmt_ram_wr_data;
   
-  
-  
+  timer_32_inst:timer_32 
+     port map ( rst=> rst,
+                clk=>clk,
+			       dout=>timer_cnt);
+					
+				
+	process(rst,clk) is
+     begin
+	    if rst='1' then
+		     reg_tx_end_time<=(others=>'0');
+			  reg_syn_start_time<=(others=>'0');
+			  reg_syn_err_time<=(others=>'0');
+		     reg_syn_true_time<=(others=>'0');
+	        reg_demap_end_time<=(others=>'0');
+		 elsif clk'event and clk='1' then
+	      if tx_cnt=19134 then
+	         	reg_tx_end_time<=timer_cnt;
+			end if;
+		   if rcv_isr_syn_start='1' then
+		         reg_syn_start_time<=timer_cnt;
+			end if;
+			if rcv_isr_syn_err='1' then
+		         reg_syn_err_time<=timer_cnt;
+			end if;
+	      if rcv_isr_syn_true='1' then
+		         reg_syn_true_time<=timer_cnt;
+			end if;
+         if rcv_isr_demap_end='1' then
+		         reg_demap_end_time<=timer_cnt;
+			end if;
+		end if;
+   end process;
 end architecture rtl ;	
 
 

@@ -41,7 +41,12 @@ component tranceiver is
 		        rx_en:out std_logic;
 		   
 			      rcv_data_delay:out std_logic_vector(11 downto 0);
-			      dma_wr_en:out std_logic
+			      dma_wr_en:out std_logic;
+			      reg_tx_end_time:out std_logic_vector(31 downto 0);
+			      reg_syn_start_time:out std_logic_vector(31 downto 0);
+			      reg_syn_err_time:out std_logic_vector(31 downto 0);
+		        reg_syn_true_time:out std_logic_vector(31 downto 0);
+	          reg_demap_end_time:out std_logic_vector(31 downto 0)
 			 );
 END component tranceiver;
 
@@ -73,7 +78,7 @@ signal cpu_rx_ram_rd_triger:std_logic;
 
 type state_t is (s_rst,s_idle,s_wr,s_rd1,s_tx,s_rd2);
 signal state,next_state:state_t;
-
+signal reg_syn_start_time,reg_syn_err_time,reg_syn_true_time,reg_demap_end_time: std_logic_vector(31 downto 0);	
 
 begin
 
@@ -168,7 +173,11 @@ u1: tranceiver PORT map
 		   ISL_C1 =>ISL_C1,
 		   ISL_C0 =>ISL_C0,
 		   tx_en => tx_en,
-		   rx_en => rx_en);
+		   rx_en => rx_en,
+		   reg_syn_start_time=>reg_syn_start_time,
+	     reg_syn_err_time=>reg_syn_err_time,
+	     reg_syn_true_time=>reg_syn_true_time,
+	     reg_demap_end_time=>reg_demap_end_time	);
 		
 	 process(rst_n,cpu_xmt_ram_wr_clk) is
      begin

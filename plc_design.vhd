@@ -2,7 +2,7 @@
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.all; 
-
+USE ieee.std_logic_unsigned.all; 
 LIBRARY work;
 
 ENTITY plc_design IS 
@@ -83,7 +83,12 @@ ENTITY plc_design IS
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
 		rx_ram_wr_adr:out std_logic_vector(6 downto 0);
-		rx_ram_rd_triger:out std_logic
+		rx_ram_rd_triger:out std_logic;
+		reg_tx_end_time:out std_logic_vector(31 downto 0);
+		reg_syn_start_time:out std_logic_vector(31 downto 0);
+		reg_syn_err_time:out std_logic_vector(31 downto 0);
+		reg_syn_true_time:out std_logic_vector(31 downto 0);
+	   reg_demap_end_time:out std_logic_vector(31 downto 0)
 	);
 END plc_design;
 
@@ -119,6 +124,10 @@ COMPONENT receiver
 		rt_r :  OUT  STD_LOGIC_VECTOR(24 DOWNTO 0);
 		syn_point :  OUT  STD_LOGIC_VECTOR(8 DOWNTO 0);
 		dma_wr_en:out std_logic;
+		rcv_isr_syn_start:out std_logic;
+		rcv_isr_syn_err:out std_logic;
+		rcv_isr_syn_true:out std_logic;
+		rcv_isr_demap_end:out std_logic;
 		rx_ram_wr_data:out std_logic_vector(31 downto 0);
 		rx_ram_wr_en:out std_logic;
 		rx_ram_wr_clk:out std_logic;
@@ -176,12 +185,22 @@ COMPONENT transfer
 	);
 END COMPONENT;
 
+component timer_32 is
+   port( rst: in std_logic;
+         clk: in std_logic;
+			dout:out std_logic_vector(31 downto 0));
+end component timer_32;
+
 SIGNAL	rst_n_tx_syn :  STD_LOGIC;
 SIGNAL	rst_rx_syn :  STD_LOGIC;
 SIGNAL	rst_tx :  STD_LOGIC;
 --SIGNAL	tx_data_o,receiver_din:  STD_LOGIC_VECTOR(11 DOWNTO 0);
 --signal demap_dout:std_logic_vector(415 downto 0);
 signal datain_t:std_logic_vector(415 downto 0);
+
+signal timer_cnt: std_logic_vector(31 downto 0);
+signal rcv_isr_syn_start,rcv_isr_syn_err,rcv_isr_syn_true,rcv_isr_demap_end:std_logic;
+signal tx_cnt_t:STD_LOGIC_VECTOR(14 DOWNTO 0);
 BEGIN 
 
 
@@ -217,6 +236,10 @@ PORT MAP(clk => clk_tx,
 		 rt_i => rt_i,
 		 syn_point => syn_point,
 		 dma_wr_en=> dma_wr_en,
+		 rcv_isr_syn_start=>rcv_isr_syn_start,
+		 rcv_isr_syn_err=>rcv_isr_syn_err,
+		 rcv_isr_syn_true=>rcv_isr_syn_true,
+		 rcv_isr_demap_end=>rcv_isr_demap_end,
 		 rx_ram_wr_data=>rx_ram_wr_data,
 		 rx_ram_wr_en=>rx_ram_wr_en,
 		 rx_ram_wr_clk=>rx_ram_wr_clk,
@@ -247,7 +270,7 @@ PORT MAP(rst => rst_rx_syn,
 		 rd_sel => rd_sel,
 		 rd_data_sel => rd_data_sel,
 		 wr_sel => wr_sel,
-		 cnt => tx_cnt,
+		 cnt => tx_cnt_t,
 		 ifft_data => ifft_data,
 		 ifft_dout_imag => ifft_dout_imag,
 		 ifft_dout_real => ifft_dout_real,
@@ -269,10 +292,38 @@ PORT MAP(rst => rst_rx_syn,
 		 c0 =>c0,
 		 c1 =>c1);
 		 
+timer_32_inst:timer_32 
+     port map ( rst=> rst_tx,
+                clk=>clk_tx,
+			       dout=>timer_cnt);	 
 		 
 		 
-		 
-		 
+	process(rst_tx,clk_tx) is
+     begin
+	    if rst_tx='1' then
+		     reg_tx_end_time<=(others=>'0');
+			  reg_syn_start_time<=(others=>'0');
+			  reg_syn_err_time<=(others=>'0');
+		     reg_syn_true_time<=(others=>'0');
+	        reg_demap_end_time<=(others=>'0');
+		 elsif clk_tx'event and clk_tx='1' then
+	      if tx_cnt_t=19134 then
+	         	reg_tx_end_time<=timer_cnt;
+			end if;
+		   if rcv_isr_syn_start='1' then
+		         reg_syn_start_time<=timer_cnt;
+			end if;
+			if rcv_isr_syn_err='1' then
+		         reg_syn_err_time<=timer_cnt;
+			end if;
+	      if rcv_isr_syn_true='1' then
+		         reg_syn_true_time<=timer_cnt;
+			end if;
+         if rcv_isr_demap_end='1' then
+		         reg_demap_end_time<=timer_cnt;
+			end if;
+		end if;
+   end process;		 
 
 
 PROCESS(clk_tx)
@@ -293,7 +344,7 @@ END PROCESS;
 
 rst_tx <= NOT(rst_n_tx);
 
-
+tx_cnt<=tx_cnt_t;
 
 END bdf_type;
 
