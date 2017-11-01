@@ -8,7 +8,7 @@ entity tranceiver is
          clk: in std_logic;
 			m_s:in std_logic;--master='1',slave='0'
 			cpu_rd_ram:in std_logic;--cpu read xmt ram data when cpu_rd_ram='1',when '0' hard logic read xmt ram data 
-		   plc_channal_data: inout std_logic_vector(11 downto 0);
+			plc_channal_data: inout std_logic_vector(11 downto 0);
 			
 			cpu_tx_triger: in std_logic;
          cpu_xmt_ram_wr_clk: in std_logic;
@@ -405,9 +405,9 @@ process(rst,m_s,clk,ram_rd_en,ram_rd_adr,xmt_ram_rd_data,cpu_rd_ram,cpu_xmt_ram_
 			       dout=>timer_cnt);
 					
 				
-	process(rst,clk) is
+	process(rst,clk,cpu_tx_triger) is
      begin
-	    if rst='1' then
+	    if rst='1' or cpu_tx_triger='1' then
 		     reg_tx_end_time<=(others=>'0');
 			  reg_syn_start_time<=(others=>'0');
 			  reg_syn_err_time<=(others=>'0');

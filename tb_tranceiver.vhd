@@ -33,7 +33,7 @@ component tranceiver is
             cpu_rx_ram_rd_adr:in std_logic_vector(6 downto 0);
 			      cpu_rx_ram_rd_data:out std_logic_vector(31 downto 0);
 		        cpu_rx_ram_rd_triger:out std_logic;
-		   
+		    
 		        tx_data_valid:out std_logic;
 		        ISL_C1:out std_logic;
 		        ISL_C0:out std_logic;
@@ -79,7 +79,6 @@ signal cpu_rx_ram_rd_triger:std_logic;
 type state_t is (s_rst,s_idle,s_wr,s_rd1,s_tx,s_rd2);
 signal state,next_state:state_t;
 signal reg_syn_start_time,reg_syn_err_time,reg_syn_true_time,reg_demap_end_time: std_logic_vector(31 downto 0);	
-
 begin
 
 
@@ -332,12 +331,12 @@ u1: tranceiver PORT map
 			      cpu_xmt_ram_wr_en<='1';
 			      cpu_xmt_ram_rd_en<='0';
 			      cpu_rx_ram_rd_en<='0';
-			      cpu_rd_ram<='0'; 
+			      cpu_rd_ram<='0';
 			   when s_rd1 =>
 			      cpu_xmt_ram_wr_en<='0';
 			      cpu_xmt_ram_rd_en<='1';
 			      cpu_rx_ram_rd_en<='0';
-			      cpu_rd_ram<='1';     
+			      cpu_rd_ram<='1';    
 			   when s_tx => 
 			      cpu_xmt_ram_wr_en<='0';
 			      cpu_xmt_ram_rd_en<='0';
@@ -347,10 +346,10 @@ u1: tranceiver PORT map
 			      cpu_xmt_ram_wr_en<='0';
 			      cpu_xmt_ram_rd_en<='0';
 			      cpu_rx_ram_rd_en<='1'; 
-			      cpu_rd_ram<='1';       
+			      cpu_rd_ram<='1'; 
+			           
        end case;
 end process;
- 
  
  
  
