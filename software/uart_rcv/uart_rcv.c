@@ -79,7 +79,7 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
 		    		RxPtr=0;
 		    		RxStart=0;
 		    		//IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
-		    		//m_s=1;
+		    		m_s=1;
 		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// 禁止CPU对ram读操作
 		    		//启动逻辑发送状态
 		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
@@ -373,7 +373,7 @@ void data_rcv_isr (void* context,alt_u32 id)
 	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
 	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x01);//CPU读取各种数据结束
 	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
-	     //      if (m_s==0)
+	          if (m_s==0)
 	         {
 	        	 //启动逻辑发送状态
 	        	IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
@@ -394,7 +394,7 @@ int main (void)
  wr_flag=0;
  RxPtr=0;
  RxStart=0;
- IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x00);//master_salve=0;
+ IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=0;
  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
  cnt=0;
  i=0;
