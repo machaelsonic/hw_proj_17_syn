@@ -78,8 +78,8 @@ void uart_rx_tx_isr (void* context,alt_u32 id)
 		    	{
 		    		RxPtr=0;
 		    		RxStart=0;
-		    		IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
-		    		m_s=1;
+		    		//IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
+		    		//m_s=1;
 		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_RAM_BASE,0x00);// 禁止CPU对ram读操作
 		    		//启动逻辑发送状态
 		    		IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
@@ -137,7 +137,7 @@ void xmt_ram_wr (void)
         adr=0;
         for (i=0;i<78;i++)
             {
-        	  xmt_ram_wr_buf[i]=i+1;
+        	  xmt_ram_wr_buf[i]=(i+1)*2;//发送到电力线上的数据，有软件人员设计
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_EN_BASE,0x01);
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_ADR_BASE,adr);
               IOWR_ALTERA_AVALON_PIO_DATA(CPU_XMT_RAM_WR_DATA_BASE,xmt_ram_wr_buf[i]);
@@ -368,10 +368,12 @@ void data_rcv_isr (void* context,alt_u32 id)
 	 IOWR_ALTERA_AVALON_PIO_DATA(LED_FOR_TEST_BASE, 0x01);
     /*************************************************************************************************/
 
-	     rx_data_rd();
+	      rx_data_rd();
 
-
-	         if (m_s==0)
+	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
+	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x01);//CPU读取各种数据结束
+	     IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
+	     //      if (m_s==0)
 	         {
 	        	 //启动逻辑发送状态
 	        	IOWR_ALTERA_AVALON_PIO_DATA(CPU_TX_TRIGER_BASE,0x00);
@@ -393,6 +395,7 @@ int main (void)
  RxPtr=0;
  RxStart=0;
  IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x00);//master_salve=0;
+ IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
  cnt=0;
  i=0;
  m_s=0;
@@ -419,8 +422,8 @@ while(1)
  {
 
 	//IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_BASE,0x0A5A5A5A);
-/*
-	 if (cnt>=5000000)
+
+	/* if (cnt>=5000000)
 		 {
 			  cnt=0;
 			  //IOWR_ALTERA_AVALON_UART_TXDATA(UART_BASE, 0XFF);

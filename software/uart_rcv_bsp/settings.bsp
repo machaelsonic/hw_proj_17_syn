@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>2017-10-30 14:49:26</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1509346166259</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>2017-11-10 16:57:20</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1510304240927</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>E:\design\QUARTUS\plc_design_final.git\software\uart_rcv_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>E:\design\QUARTUS\plc_design_final.git\NIOS2.sopcinfo</SopcDesignFile>
@@ -876,199 +876,205 @@
         </Setting>
         <MemoryMap>
                 <slaveDescriptor>RAM</slaveDescriptor>
-                <addressRange>0x00008000 - 0x0000F7FF</addressRange>
-                <addressSpan>30720</addressSpan>
+                <addressRange>0x00010000 - 0x00019FFF</addressRange>
+                <addressSpan>40960</addressSpan>
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>epcs_flash_controller_0</slaveDescriptor>
-                <addressRange>0x00011000 - 0x000117FF</addressRange>
+                <addressRange>0x00021000 - 0x000217FF</addressRange>
                 <addressSpan>2048</addressSpan>
                 <attributes>flash, memory, non-volatile</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>uart</slaveDescriptor>
-                <addressRange>0x00012000 - 0x0001201F</addressRange>
+                <addressRange>0x00022000 - 0x0002201F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
         <MemoryMap>
+                <slaveDescriptor>cpu_rd_end</slaveDescriptor>
+                <addressRange>0x00022020 - 0x0002202F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
                 <slaveDescriptor>reg_demap_end_time</slaveDescriptor>
-                <addressRange>0x00012020 - 0x0001202F</addressRange>
+                <addressRange>0x00022030 - 0x0002203F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>reg_syn_true_time</slaveDescriptor>
-                <addressRange>0x00012030 - 0x0001203F</addressRange>
+                <addressRange>0x00022040 - 0x0002204F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>reg_syn_err_time</slaveDescriptor>
-                <addressRange>0x00012040 - 0x0001204F</addressRange>
+                <addressRange>0x00022050 - 0x0002205F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>reg_syn_start_time</slaveDescriptor>
-                <addressRange>0x00012050 - 0x0001205F</addressRange>
+                <addressRange>0x00022060 - 0x0002206F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>reg_tx_end_time</slaveDescriptor>
-                <addressRange>0x00012060 - 0x0001206F</addressRange>
+                <addressRange>0x00022070 - 0x0002207F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>rx_gain</slaveDescriptor>
-                <addressRange>0x00012070 - 0x0001207F</addressRange>
+                <addressRange>0x00022080 - 0x0002208F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_9866_recfg</slaveDescriptor>
-                <addressRange>0x00012080 - 0x0001208F</addressRange>
+                <addressRange>0x00022090 - 0x0002209F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_rd_adr</slaveDescriptor>
-                <addressRange>0x00012090 - 0x0001209F</addressRange>
+                <addressRange>0x000220A0 - 0x000220AF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rx_ram_rd_adr</slaveDescriptor>
-                <addressRange>0x000120A0 - 0x000120AF</addressRange>
+                <addressRange>0x000220B0 - 0x000220BF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rx_ram_rd_en</slaveDescriptor>
-                <addressRange>0x000120B0 - 0x000120BF</addressRange>
+                <addressRange>0x000220C0 - 0x000220CF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rx_ram_rd_clk</slaveDescriptor>
-                <addressRange>0x000120C0 - 0x000120CF</addressRange>
+                <addressRange>0x000220D0 - 0x000220DF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_wr_data</slaveDescriptor>
-                <addressRange>0x000120D0 - 0x000120DF</addressRange>
+                <addressRange>0x000220E0 - 0x000220EF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_rd_en</slaveDescriptor>
-                <addressRange>0x000120E0 - 0x000120EF</addressRange>
+                <addressRange>0x000220F0 - 0x000220FF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_rd_clk</slaveDescriptor>
-                <addressRange>0x000120F0 - 0x000120FF</addressRange>
+                <addressRange>0x00022100 - 0x0002210F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_wr_adr</slaveDescriptor>
-                <addressRange>0x00012100 - 0x0001210F</addressRange>
+                <addressRange>0x00022110 - 0x0002211F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_wr_en</slaveDescriptor>
-                <addressRange>0x00012110 - 0x0001211F</addressRange>
+                <addressRange>0x00022120 - 0x0002212F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rd_ram</slaveDescriptor>
-                <addressRange>0x00012120 - 0x0001212F</addressRange>
+                <addressRange>0x00022130 - 0x0002213F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_rd_data</slaveDescriptor>
-                <addressRange>0x00012130 - 0x0001213F</addressRange>
+                <addressRange>0x00022140 - 0x0002214F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_xmt_ram_wr_clk</slaveDescriptor>
-                <addressRange>0x00012140 - 0x0001214F</addressRange>
+                <addressRange>0x00022150 - 0x0002215F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>rd_clk</slaveDescriptor>
-                <addressRange>0x00012150 - 0x0001215F</addressRange>
+                <addressRange>0x00022160 - 0x0002216F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>rd_adr</slaveDescriptor>
-                <addressRange>0x00012160 - 0x0001216F</addressRange>
+                <addressRange>0x00022170 - 0x0002217F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>rcv_ram_data</slaveDescriptor>
-                <addressRange>0x00012170 - 0x0001217F</addressRange>
+                <addressRange>0x00022180 - 0x0002218F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>rcv_ram_wr_end</slaveDescriptor>
-                <addressRange>0x00012180 - 0x0001218F</addressRange>
+                <addressRange>0x00022190 - 0x0002219F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>master_slave</slaveDescriptor>
-                <addressRange>0x00012190 - 0x0001219F</addressRange>
+                <addressRange>0x000221A0 - 0x000221AF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>LED_FOR_TEST</slaveDescriptor>
-                <addressRange>0x000121A0 - 0x000121AF</addressRange>
+                <addressRange>0x000221B0 - 0x000221BF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_tx_triger</slaveDescriptor>
-                <addressRange>0x000121B0 - 0x000121BF</addressRange>
+                <addressRange>0x000221C0 - 0x000221CF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rx_ram_rd_triger</slaveDescriptor>
-                <addressRange>0x000121C0 - 0x000121CF</addressRange>
+                <addressRange>0x000221D0 - 0x000221DF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>cpu_rx_ram_rd_data</slaveDescriptor>
-                <addressRange>0x000121D0 - 0x000121DF</addressRange>
+                <addressRange>0x000221E0 - 0x000221EF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sysid</slaveDescriptor>
-                <addressRange>0x000121E0 - 0x000121E7</addressRange>
+                <addressRange>0x000221F0 - 0x000221F7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart</slaveDescriptor>
-                <addressRange>0x000121E8 - 0x000121EF</addressRange>
+                <addressRange>0x000221F8 - 0x000221FF</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>

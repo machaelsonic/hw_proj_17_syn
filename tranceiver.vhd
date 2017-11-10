@@ -25,7 +25,7 @@ entity tranceiver is
          cpu_rx_ram_rd_adr:in std_logic_vector(6 downto 0);
 			cpu_rx_ram_rd_data:out std_logic_vector(31 downto 0);
 		   cpu_rx_ram_rd_triger:out std_logic;
-		   
+		   cpu_rd_end:in std_logic;
 		   tx_data_valid:out std_logic;
 		   ISL_C1:out std_logic;
 		   ISL_C0:out std_logic;
@@ -127,7 +127,7 @@ signal tx_cnt:STD_LOGIC_VECTOR(14 DOWNTO 0);
 signal rx_cnt:integer range 0 to 13999;
 signal tx_en_t,rx_en_t:std_logic;
 signal cpu_tx_data_t,cpu_rx_data_t:std_logic_vector(415 downto 0);
-type state_t is (s_rst,s_rx,s_tx,s_delay2tx,s_delay2rx);
+type state_t is (s_rst,s_rx1,s_rx2,s_tx,s_delay2tx,s_delay2rx,s_cpu_rd);
 signal state,next_state:state_t;
 --signal flag,slave_tx_data_valid:std_logic;
 attribute keep:boolean;
@@ -173,23 +173,22 @@ begin
         end if;
  end process;
  
- process(state,rst,cpu_tx_triger,tx_cnt,delay_cnt) is
+ process(state,rst,cpu_tx_triger,tx_cnt,delay_cnt,rx_ram_rd_triger,cpu_rd_end) is
     begin
        case state is
         when s_rst =>
              if rst='1' then
                   next_state<=s_rst;
               else
-                 next_state<=s_rx;
+                  next_state<=s_rx1;
               end if;
-	 
-        when s_rx =>
+		 when s_rx1 =>
 			 if  cpu_tx_triger='1'   then
-                next_state<=s_delay2tx;	 
-          else
-                next_state<=s_rx;					 
+                next_state<=s_delay2tx;	 	     
+			 else
+                next_state<=s_rx1;					 
           end if;
-			
+			 
 			when s_delay2tx =>
           if  delay_cnt=2 then  
              next_state<=s_tx;
@@ -203,15 +202,27 @@ begin
           else
              next_state<=s_tx;	 
           end if;
-			when s_delay2rx =>
+		  when s_delay2rx =>
           if  delay_cnt=2 then  
-             next_state<=s_rx;
+             next_state<=s_rx2;
           else
              next_state<=s_delay2rx;	 
-          end if; 
-			  
+          end if;   			 
+		 when s_rx2 =>
+			 if rx_ram_rd_triger='1' then
+                next_state<=s_cpu_rd;	 
+          else
+                next_state<=s_rx2;					 
+          end if;			 
+		 when s_cpu_rd =>
+			 if  cpu_rd_end='1'   then
+                next_state<=s_rx1;	 
+          else
+                next_state<=s_cpu_rd;					 
+          end if;
      end case;
-   end process;    
+   end process; 
+   
  process(state) is
     begin
       case state is
@@ -219,7 +230,7 @@ begin
 			      rx_en_t<='0';
 					tx_en_t<='0'; 
 					delay_cnt_en<='0';
-         when s_rx => 
+         when s_rx1 => 
 			      rx_en_t<='1';
 					tx_en_t<='0'; 
 					delay_cnt_en<='0';
@@ -235,7 +246,14 @@ begin
 			      rx_en_t<='0';
 					tx_en_t<='0';  
 			      delay_cnt_en<='1';
-
+         when s_rx2 => 
+			      rx_en_t<='1';
+					tx_en_t<='0'; 
+					delay_cnt_en<='0';
+			when s_cpu_rd => 
+			      rx_en_t<='0';
+					tx_en_t<='0'; 
+					delay_cnt_en<='0';
     end case;
 end process;
 

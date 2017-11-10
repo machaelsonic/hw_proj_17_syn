@@ -33,13 +33,13 @@ component tranceiver is
             cpu_rx_ram_rd_adr:in std_logic_vector(6 downto 0);
 			      cpu_rx_ram_rd_data:out std_logic_vector(31 downto 0);
 		        cpu_rx_ram_rd_triger:out std_logic;
-		    
+		        cpu_rd_end:in std_logic;
 		        tx_data_valid:out std_logic;
 		        ISL_C1:out std_logic;
 		        ISL_C0:out std_logic;
 		        tx_en:out std_logic;
 		        rx_en:out std_logic;
-		   
+		        
 			      rcv_data_delay:out std_logic_vector(11 downto 0);
 			      dma_wr_en:out std_logic;
 			      reg_tx_end_time:out std_logic_vector(31 downto 0);
@@ -74,7 +74,7 @@ signal cpu_rx_ram_rd_data: std_logic_vector(31 downto 0);
 signal cpu_rx_ram_rd_en,cpu_rx_ram_rd_clk: std_logic;
 signal cpu_rx_ram_rd_adr,cpu_rx_ram_rd_cnt:std_logic_vector(6 downto 0);
 signal m_s,cpu_rd_ram,cpu_rd_en,cpu_wr_en:std_logic;
-signal cpu_rx_ram_rd_triger:std_logic;
+signal cpu_rx_ram_rd_triger,cpu_rd_end:std_logic;
 
 type state_t is (s_rst,s_idle,s_wr,s_rd1,s_tx,s_rd2);
 signal state,next_state:state_t;
@@ -113,8 +113,14 @@ process
     cpu_wr_en<='0';
     wait;
   end process;
-  
-
+ process
+    begin
+       cpu_rd_end<='0';
+     wait for 3000000 ns; 
+        cpu_rd_end<='1';
+     wait for 40 ns;
+        cpu_rd_end<='0';
+end process; 
   
  
 
@@ -142,7 +148,7 @@ process
 --cpu_tx_data_valid<='0';
 --dout<="101001011010010110100101101001011010";
 --cpu_tx_data<=tmp; 
-
+ 
    
 u1: tranceiver PORT map 
 	  (
@@ -167,7 +173,7 @@ u1: tranceiver PORT map
        cpu_rx_ram_rd_data=>cpu_rx_ram_rd_data,
 		   cpu_rx_ram_rd_triger=>cpu_rx_ram_rd_triger,
 		   
-		   
+		   cpu_rd_end=>cpu_rd_end,
 		   tx_data_valid =>tx_data_valid,
 		   ISL_C1 =>ISL_C1,
 		   ISL_C0 =>ISL_C0,
@@ -250,6 +256,8 @@ u1: tranceiver PORT map
       end if; 
   end process; 
   
+
+ 
  cpu_xmt_ram_wr_clk<=clk;
  cpu_xmt_ram_wr_adr<=cpu_xmt_ram_wr_cnt;
  cpu_xmt_ram_wr_data(31 downto 7)<=(others=>'0');

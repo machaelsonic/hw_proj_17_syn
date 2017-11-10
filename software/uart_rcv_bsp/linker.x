@@ -4,7 +4,7 @@
  * Machine generated for CPU 'CPU' in SOPC Builder design 'NIOS2'
  * SOPC Builder design path: E:/design/QUARTUS/plc_design_final.git/NIOS2.sopcinfo
  *
- * Generated: Fri Oct 27 17:44:07 CST 2017
+ * Generated: Fri Nov 10 11:28:39 CST 2017
  */
 
 /*
@@ -50,15 +50,15 @@
 
 MEMORY
 {
-    RAM_BEFORE_EXCEPTION : ORIGIN = 0x8000, LENGTH = 32
-    RAM : ORIGIN = 0x8020, LENGTH = 30688
-    reset : ORIGIN = 0x11000, LENGTH = 32
-    epcs_flash_controller_0 : ORIGIN = 0x11020, LENGTH = 2016
+    RAM_BEFORE_EXCEPTION : ORIGIN = 0x10000, LENGTH = 32
+    RAM : ORIGIN = 0x10020, LENGTH = 40928
+    reset : ORIGIN = 0x21000, LENGTH = 32
+    epcs_flash_controller_0 : ORIGIN = 0x21020, LENGTH = 2016
 }
 
 /* Define symbols for each memory base-address */
-__alt_mem_RAM = 0x8000;
-__alt_mem_epcs_flash_controller_0 = 0x11000;
+__alt_mem_RAM = 0x10000;
+__alt_mem_epcs_flash_controller_0 = 0x21000;
 
 OUTPUT_FORMAT( "elf32-littlenios2",
                "elf32-littlenios2",
@@ -346,7 +346,7 @@ SECTIONS
 /*
  * Don't override this, override the __alt_stack_* symbols instead.
  */
-__alt_data_end = 0xf800;
+__alt_data_end = 0x1a000;
 
 /*
  * The next two symbols define the location of the default stack.  You can
@@ -362,4 +362,4 @@ PROVIDE( __alt_stack_limit   = __alt_stack_base );
  * Override this symbol to put the heap in a different memory.
  */
 PROVIDE( __alt_heap_start    = end );
-PROVIDE( __alt_heap_limit    = 0xf800 );
+PROVIDE( __alt_heap_limit    = 0x1a000 );
