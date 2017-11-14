@@ -4,7 +4,7 @@
  * Machine generated for CPU 'CPU' in SOPC Builder design 'NIOS2'
  * SOPC Builder design path: E:/design/QUARTUS/plc_design_final.git/NIOS2.sopcinfo
  *
- * Generated: Fri Nov 10 16:55:07 CST 2017
+ * Generated: Tue Nov 14 13:48:02 CST 2017
  */
 
 /*
@@ -186,8 +186,8 @@
 #define RAM_READ_DURING_WRITE_MODE "DONT_CARE"
 #define RAM_SINGLE_CLOCK_OP 0
 #define RAM_SIZE_MULTIPLE 1
-#define RAM_SIZE_VALUE 40960u
-#define RAM_SPAN 40960
+#define RAM_SIZE_VALUE 51200u
+#define RAM_SPAN 51200
 #define RAM_TYPE "altera_avalon_onchip_memory2"
 #define RAM_WRITABLE 1
 
@@ -1039,7 +1039,7 @@
 #define SYSID_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_NAME "/dev/sysid"
 #define SYSID_SPAN 8
-#define SYSID_TIMESTAMP 1510303593
+#define SYSID_TIMESTAMP 1510637477
 #define SYSID_TYPE "altera_avalon_sysid_qsys"
 
 

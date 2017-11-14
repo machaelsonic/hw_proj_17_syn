@@ -315,8 +315,8 @@ b2v_inst8 : fifo_8
  
  
 		 
-		 rcv_data<=rcv_data_t;
-
+		 --rcv_data<=rcv_data_t;
+         rcv_data<=rcv_data_delay_t;
 
 
 b2v_inst_17 : de_map

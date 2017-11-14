@@ -3,7 +3,7 @@
 # Machine generated for CPU 'CPU' in SOPC Builder design 'NIOS2'
 # SOPC Builder design path: E:/design/QUARTUS/plc_design_final.git/NIOS2.sopcinfo
 #
-# Generated: Fri Nov 10 11:28:39 CST 2017
+# Generated: Mon Nov 13 14:50:00 CST 2017
 
 # DO NOT MODIFY THIS FILE
 #
@@ -47,7 +47,7 @@
 # by allowing GDB to cache memory contents on the host.
 
 # RAM
-memory 0x10000 0x1a000 cache
+memory 0x10000 0x1c800 cache
 
 # epcs_flash_controller_0
 memory 0x21000 0x21800 cache

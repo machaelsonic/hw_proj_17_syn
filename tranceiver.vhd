@@ -210,7 +210,9 @@ begin
           end if;   			 
 		 when s_rx2 =>
 			 if rx_ram_rd_triger='1' then
-                next_state<=s_cpu_rd;	 
+                next_state<=s_cpu_rd;
+			 elsif cpu_tx_triger='1'   then
+                next_state<=s_delay2tx; 	 
           else
                 next_state<=s_rx2;					 
           end if;			 

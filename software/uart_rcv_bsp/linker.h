@@ -4,7 +4,7 @@
  * Machine generated for CPU 'CPU' in SOPC Builder design 'NIOS2'
  * SOPC Builder design path: E:/design/QUARTUS/plc_design_final.git/NIOS2.sopcinfo
  *
- * Generated: Fri Nov 10 11:28:39 CST 2017
+ * Generated: Mon Nov 13 14:50:00 CST 2017
  */
 
 /*
@@ -70,7 +70,7 @@
 #define RAM_BEFORE_EXCEPTION_REGION_BASE 0x10000
 #define RAM_BEFORE_EXCEPTION_REGION_SPAN 32
 #define RAM_REGION_BASE 0x10020
-#define RAM_REGION_SPAN 40928
+#define RAM_REGION_SPAN 51168
 #define RESET_REGION_BASE 0x21000
 #define RESET_REGION_SPAN 32
 

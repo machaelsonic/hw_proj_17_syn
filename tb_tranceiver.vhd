@@ -52,7 +52,8 @@ END component tranceiver;
 
 
 --FILE tb_tx_data_tranceiver:TEXT OPEN WRITE_MODE IS "tb_tx_data_tranceiver.txt";
-FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_tranceiver3.txt";
+--FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_tranceiver3.txt";
+FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "tb_tx_data_o.txt";
 --FILE tb_rx_data_tranceiver:TEXT OPEN READ_MODE IS "rcv_data3.txt";
 signal cnt_1:integer range 0 to 49999;
 signal tmp :std_logic_vector(31 downto 0);

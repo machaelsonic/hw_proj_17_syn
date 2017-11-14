@@ -394,7 +394,7 @@ int main (void)
  wr_flag=0;
  RxPtr=0;
  RxStart=0;
- IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=0;
+ IOWR_ALTERA_AVALON_PIO_DATA(MASTER_SLAVE_BASE,0x01);//master_salve=1;
  IOWR_ALTERA_AVALON_PIO_DATA(CPU_RD_END_BASE,0x00);
  cnt=0;
  i=0;
@@ -420,6 +420,8 @@ int main (void)
 
 while(1)
  {
+
+
 
 	//IOWR_ALTERA_AVALON_PIO_DATA(DATA_OUT_BASE,0x0A5A5A5A);
 

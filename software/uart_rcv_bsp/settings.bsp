@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>2017-11-10 16:57:20</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1510304240927</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>2017-11-14 13:48:02</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1510638482564</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>E:\design\QUARTUS\plc_design_final.git\software\uart_rcv_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>E:\design\QUARTUS\plc_design_final.git\NIOS2.sopcinfo</SopcDesignFile>
@@ -876,8 +876,8 @@
         </Setting>
         <MemoryMap>
                 <slaveDescriptor>RAM</slaveDescriptor>
-                <addressRange>0x00010000 - 0x00019FFF</addressRange>
-                <addressSpan>40960</addressSpan>
+                <addressRange>0x00010000 - 0x0001C7FF</addressRange>
+                <addressSpan>51200</addressSpan>
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
