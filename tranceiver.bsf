@@ -1,0 +1,253 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 1991-2012 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+*/
+(header "symbol" (version "1.1"))
+(symbol
+	(rect 16 16 352 320)
+	(text "tranceiver" (rect 5 0 45 12)(font "Arial" ))
+	(text "inst" (rect 8 288 20 300)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "rst" (rect 0 0 10 12)(font "Arial" ))
+		(text "rst" (rect 21 27 31 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32)(line_width 1))
+	)
+	(port
+		(pt 0 48)
+		(input)
+		(text "clk" (rect 0 0 10 12)(font "Arial" ))
+		(text "clk" (rect 21 43 31 55)(font "Arial" ))
+		(line (pt 0 48)(pt 16 48)(line_width 1))
+	)
+	(port
+		(pt 0 64)
+		(input)
+		(text "m_s" (rect 0 0 18 12)(font "Arial" ))
+		(text "m_s" (rect 21 59 39 71)(font "Arial" ))
+		(line (pt 0 64)(pt 16 64)(line_width 1))
+	)
+	(port
+		(pt 0 80)
+		(input)
+		(text "cpu_rd_ram" (rect 0 0 50 12)(font "Arial" ))
+		(text "cpu_rd_ram" (rect 21 75 71 87)(font "Arial" ))
+		(line (pt 0 80)(pt 16 80)(line_width 1))
+	)
+	(port
+		(pt 0 96)
+		(input)
+		(text "cpu_tx_triger" (rect 0 0 53 12)(font "Arial" ))
+		(text "cpu_tx_triger" (rect 21 91 74 103)(font "Arial" ))
+		(line (pt 0 96)(pt 16 96)(line_width 1))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "cpu_xmt_ram_wr_clk" (rect 0 0 89 12)(font "Arial" ))
+		(text "cpu_xmt_ram_wr_clk" (rect 21 107 110 119)(font "Arial" ))
+		(line (pt 0 112)(pt 16 112)(line_width 1))
+	)
+	(port
+		(pt 0 128)
+		(input)
+		(text "cpu_xmt_ram_wr_en" (rect 0 0 88 12)(font "Arial" ))
+		(text "cpu_xmt_ram_wr_en" (rect 21 123 109 135)(font "Arial" ))
+		(line (pt 0 128)(pt 16 128)(line_width 1))
+	)
+	(port
+		(pt 0 144)
+		(input)
+		(text "cpu_xmt_ram_wr_adr[6..0]" (rect 0 0 112 12)(font "Arial" ))
+		(text "cpu_xmt_ram_wr_adr[6..0]" (rect 21 139 133 151)(font "Arial" ))
+		(line (pt 0 144)(pt 16 144)(line_width 3))
+	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "cpu_xmt_ram_wr_data[31..0]" (rect 0 0 119 12)(font "Arial" ))
+		(text "cpu_xmt_ram_wr_data[31..0]" (rect 21 155 140 167)(font "Arial" ))
+		(line (pt 0 160)(pt 16 160)(line_width 3))
+	)
+	(port
+		(pt 0 176)
+		(input)
+		(text "cpu_xmt_ram_rd_clk" (rect 0 0 88 12)(font "Arial" ))
+		(text "cpu_xmt_ram_rd_clk" (rect 21 171 109 183)(font "Arial" ))
+		(line (pt 0 176)(pt 16 176)(line_width 1))
+	)
+	(port
+		(pt 0 192)
+		(input)
+		(text "cpu_xmt_ram_rd_en" (rect 0 0 87 12)(font "Arial" ))
+		(text "cpu_xmt_ram_rd_en" (rect 21 187 108 199)(font "Arial" ))
+		(line (pt 0 192)(pt 16 192)(line_width 1))
+	)
+	(port
+		(pt 0 208)
+		(input)
+		(text "cpu_xmt_ram_rd_adr[6..0]" (rect 0 0 110 12)(font "Arial" ))
+		(text "cpu_xmt_ram_rd_adr[6..0]" (rect 21 203 131 215)(font "Arial" ))
+		(line (pt 0 208)(pt 16 208)(line_width 3))
+	)
+	(port
+		(pt 0 224)
+		(input)
+		(text "cpu_rx_ram_rd_clk" (rect 0 0 81 12)(font "Arial" ))
+		(text "cpu_rx_ram_rd_clk" (rect 21 219 102 231)(font "Arial" ))
+		(line (pt 0 224)(pt 16 224)(line_width 1))
+	)
+	(port
+		(pt 0 240)
+		(input)
+		(text "cpu_rx_ram_rd_en" (rect 0 0 80 12)(font "Arial" ))
+		(text "cpu_rx_ram_rd_en" (rect 21 235 101 247)(font "Arial" ))
+		(line (pt 0 240)(pt 16 240)(line_width 1))
+	)
+	(port
+		(pt 0 256)
+		(input)
+		(text "cpu_rx_ram_rd_adr[6..0]" (rect 0 0 103 12)(font "Arial" ))
+		(text "cpu_rx_ram_rd_adr[6..0]" (rect 21 251 124 263)(font "Arial" ))
+		(line (pt 0 256)(pt 16 256)(line_width 3))
+	)
+	(port
+		(pt 0 272)
+		(input)
+		(text "cpu_rd_end" (rect 0 0 48 12)(font "Arial" ))
+		(text "cpu_rd_end" (rect 21 267 69 279)(font "Arial" ))
+		(line (pt 0 272)(pt 16 272)(line_width 1))
+	)
+	(port
+		(pt 336 48)
+		(output)
+		(text "cpu_xmt_ram_rd_data[31..0]" (rect 0 0 118 12)(font "Arial" ))
+		(text "cpu_xmt_ram_rd_data[31..0]" (rect 197 43 315 55)(font "Arial" ))
+		(line (pt 336 48)(pt 320 48)(line_width 3))
+	)
+	(port
+		(pt 336 64)
+		(output)
+		(text "cpu_rx_ram_rd_data[31..0]" (rect 0 0 110 12)(font "Arial" ))
+		(text "cpu_rx_ram_rd_data[31..0]" (rect 205 59 315 71)(font "Arial" ))
+		(line (pt 336 64)(pt 320 64)(line_width 3))
+	)
+	(port
+		(pt 336 80)
+		(output)
+		(text "cpu_rx_ram_rd_triger" (rect 0 0 90 12)(font "Arial" ))
+		(text "cpu_rx_ram_rd_triger" (rect 225 75 315 87)(font "Arial" ))
+		(line (pt 336 80)(pt 320 80)(line_width 1))
+	)
+	(port
+		(pt 336 96)
+		(output)
+		(text "tx_data_valid" (rect 0 0 53 12)(font "Arial" ))
+		(text "tx_data_valid" (rect 262 91 315 103)(font "Arial" ))
+		(line (pt 336 96)(pt 320 96)(line_width 1))
+	)
+	(port
+		(pt 336 112)
+		(output)
+		(text "ISL_C1" (rect 0 0 30 12)(font "Arial" ))
+		(text "ISL_C1" (rect 285 107 315 119)(font "Arial" ))
+		(line (pt 336 112)(pt 320 112)(line_width 1))
+	)
+	(port
+		(pt 336 128)
+		(output)
+		(text "ISL_C0" (rect 0 0 31 12)(font "Arial" ))
+		(text "ISL_C0" (rect 284 123 315 135)(font "Arial" ))
+		(line (pt 336 128)(pt 320 128)(line_width 1))
+	)
+	(port
+		(pt 336 144)
+		(output)
+		(text "tx_en" (rect 0 0 22 12)(font "Arial" ))
+		(text "tx_en" (rect 293 139 315 151)(font "Arial" ))
+		(line (pt 336 144)(pt 320 144)(line_width 1))
+	)
+	(port
+		(pt 336 160)
+		(output)
+		(text "rx_en" (rect 0 0 23 12)(font "Arial" ))
+		(text "rx_en" (rect 292 155 315 167)(font "Arial" ))
+		(line (pt 336 160)(pt 320 160)(line_width 1))
+	)
+	(port
+		(pt 336 176)
+		(output)
+		(text "rcv_data_delay[11..0]" (rect 0 0 86 12)(font "Arial" ))
+		(text "rcv_data_delay[11..0]" (rect 229 171 315 183)(font "Arial" ))
+		(line (pt 336 176)(pt 320 176)(line_width 3))
+	)
+	(port
+		(pt 336 192)
+		(output)
+		(text "dma_wr_en" (rect 0 0 48 12)(font "Arial" ))
+		(text "dma_wr_en" (rect 267 187 315 199)(font "Arial" ))
+		(line (pt 336 192)(pt 320 192)(line_width 1))
+	)
+	(port
+		(pt 336 208)
+		(output)
+		(text "reg_tx_end_time[31..0]" (rect 0 0 92 12)(font "Arial" ))
+		(text "reg_tx_end_time[31..0]" (rect 223 203 315 215)(font "Arial" ))
+		(line (pt 336 208)(pt 320 208)(line_width 3))
+	)
+	(port
+		(pt 336 224)
+		(output)
+		(text "reg_syn_start_time[31..0]" (rect 0 0 103 12)(font "Arial" ))
+		(text "reg_syn_start_time[31..0]" (rect 212 219 315 231)(font "Arial" ))
+		(line (pt 336 224)(pt 320 224)(line_width 3))
+	)
+	(port
+		(pt 336 240)
+		(output)
+		(text "reg_syn_err_time[31..0]" (rect 0 0 97 12)(font "Arial" ))
+		(text "reg_syn_err_time[31..0]" (rect 218 235 315 247)(font "Arial" ))
+		(line (pt 336 240)(pt 320 240)(line_width 3))
+	)
+	(port
+		(pt 336 256)
+		(output)
+		(text "reg_syn_true_time[31..0]" (rect 0 0 101 12)(font "Arial" ))
+		(text "reg_syn_true_time[31..0]" (rect 214 251 315 263)(font "Arial" ))
+		(line (pt 336 256)(pt 320 256)(line_width 3))
+	)
+	(port
+		(pt 336 272)
+		(output)
+		(text "reg_demap_end_time[31..0]" (rect 0 0 112 12)(font "Arial" ))
+		(text "reg_demap_end_time[31..0]" (rect 203 267 315 279)(font "Arial" ))
+		(line (pt 336 272)(pt 320 272)(line_width 3))
+	)
+	(port
+		(pt 336 32)
+		(bidir)
+		(text "plc_channal_data[11..0]" (rect 0 0 90 12)(font "Arial" ))
+		(text "plc_channal_data[11..0]" (rect 225 27 315 39)(font "Arial" ))
+		(line (pt 336 32)(pt 320 32)(line_width 3))
+	)
+	(drawing
+		(rectangle (rect 16 16 320 288)(line_width 1))
+	)
+)
